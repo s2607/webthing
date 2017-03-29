@@ -17,25 +17,25 @@ typedef struct {
 #define PRLC 100
 
 //lists always grow until they are freed
-void **append(char ***l, int *lm, void *a)//put pointer at end of list, growing backing buffer if nescesary
+void **append(char **l, int *lm, void *a)//put pointer at end of list, growing backing buffer if nescesary
 //so much void *
 {
-	if(!*l){
-		*l=calloc(PRLC,sizeof(char *));
+	if(!l){
+		l=calloc(PRLC,sizeof(char *));
 		*lm=PRLC;
 	}
 	if(!a)
 		return l;
 	int len;
-	for(len=0;(*l)[len]&&len<*lm;len++);
+	for(len=0;(l)[len]&&len<*lm;len++);
 	if(len==*lm){
-		*l=realloc(l,*lm+PRLC);
+		l=realloc(l,*lm+PRLC);
 		*lm=*lm+PRLC;
 		int i;
 		for(i=0;i<PRLC;i++)
-			*(l)[*lm+i]=NULL;
+			(l)[*lm+i]=NULL;
 	}
-	(*l)[len]=a;
+	(l)[len]=a;
 	return l;
 }
 
@@ -73,7 +73,8 @@ char *rtag(tag *t, char *s, char *supername,int state)
 	char **cursn;
 
 	int tm;//used for reallocing property lists entrys
-	for(state=0;*s&&!(t->closing&&state>=2);s=s+1){
+	//for(state=0;*s&&!(t->closing&&state>=1);s=s+1){
+	for(state=0;*s;s=s+1){
 		switch(*s){
 			case '<': if(state==3){ s=rtag(newchild(t),s+1,t->type,0); if(closed(t)){return s;} break;}
 			case '/': if(state==0){t->closing=1;break;}
