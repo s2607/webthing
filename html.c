@@ -84,12 +84,12 @@ char *rtag(tag *t, char *s, char *supername,int state)
 				t->pn=append(t->pn,&(t->pnm),calloc(sizeof(char),PRLC));
 				tm=PRLC;
 				int tail;
-				for(tail=0;t->pn;tail++);
+				for(tail=0;t->pn[tail];tail++);
 				curs=&(t->pn[tail-1]);
 				//alloc value
 				t->pv=append(t->pv,&(t->pvm),calloc(sizeof(char),PRLC));
 				//NOTE: on state 2 we must remember we calloced PRLC elemnts
-				for(tail=0;t->pn;tail++);
+				for(tail=0;t->pn[tail];tail++);
 				cursn=&(t->pv[tail-1]);
 				
 			} if(state==1) break; //dont put space in property name
@@ -119,8 +119,9 @@ void dump(tag *root,int i)
 	for(j=0;j<=i;j++)printf(" ");
 	printf("%s:\n",root->type);
 	for(j=0;j<=i;j++)printf(" ");
-	for(k=0;root->pn[k];k++)
-		printf(" %s=%s",root->pn[k],root->pv[k]);
+	if(root->pn)
+		for(k=0;root->pn[k];k++)
+			printf(" %s=%s",root->pn[k],root->pv[k]);
 	printf("\n");
 	if(root->pn){
 		for(k=0;root->child[k];k++)
