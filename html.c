@@ -123,10 +123,10 @@ void dump(tag *root,int i)
 		for(k=0;root->pn[k];k++)
 			printf(" %s=%s",root->pn[k],root->pv[k]);
 	printf("\n");
-	if(root->pn){
+	if(root->child)
 		for(k=0;root->child[k];k++)
 			dump(root->child[k],i+1);
-	}
+	
 }
 int main()
 {
