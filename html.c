@@ -78,7 +78,6 @@ char *rtag(tag *t, char *s, char *supername,int state)
 {
 //TODO: span: exit as soon as we find a right bracket
 //TODO: non html inner text (script, comment, pre): replace mode 3 with mode 4 that just fills inner text
-//TODO: inner text should just be child nodes of a special type
 	//0 tagname 1 propname  2 propval 3 freetext 
 	char *freetext=NULL;
 	int freetextm=0;
@@ -110,6 +109,7 @@ char *rtag(tag *t, char *s, char *supername,int state)
 					curm=&freetextm;
 					if(t->closing==1)
 						return s; 
+					break;
 				} 
 				else break;
 			case '=': if(state==1){state=2; tm=PRLC; curm=&tm; curs=cursn; continue;}break;
@@ -127,6 +127,7 @@ char *rtag(tag *t, char *s, char *supername,int state)
 				//NOTE: on state 2 we must remember we calloced PRLC elemnts
 				for(tail=0;t->pn[tail];tail++);
 				cursn=&(t->pv[tail-1]);
+				continue;
 				
 				} if(state==1) continue; //dont put space in property name
 			default: //some text or name or attribute
@@ -156,15 +157,15 @@ void dump(tag *root,int i)
 	for(j=0;j<=i;j++)printf(" ");
 	if(strcmp(root->type,"itf"))
 		printf("%s:\n",root->type);
-	else{
-		printf("%s\n",root->freetext);
-		return;
-	}
 	for(j=0;j<=i;j++)printf(" ");
 	if(root->pn)
 		for(k=0;root->pn[k];k++)
 			printf(" %s=%s",root->pn[k],root->pv[k]);
 	printf("\n");
+	if(root->freetext){
+	for(j=0;j<=i;j++)printf(" ");
+		printf("inner: %s\n",root->freetext);
+	}
 	if(root->child)
 		for(k=0;root->child[k];k++)
 			dump(root->child[k],i+1);
