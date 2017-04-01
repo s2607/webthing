@@ -14,6 +14,7 @@ typedef struct {
 	void *parent;
 	char *freetext;
 } tag;
+//trade space for time
 #define PRLC 100
 
 //lists always grow until they are freed
@@ -49,6 +50,17 @@ tag *newchild(tag *t)
 	}
 	return r;
 }
+void newchildtext(tag *t,char *it)
+{
+	if(!it)
+		return;
+	tag *r;
+	r->type=calloc(4,1);
+	memcpy(r->type,"itf",4);
+	r->freetext=calloc(strlen(it),1);
+	memcpy(r->freetext,it,strlen(it));
+	free(it);
+}
 int closed(tag *t)
 {
 	int len;
@@ -63,9 +75,12 @@ int closed(tag *t)
 }
 
 char *rtag(tag *t, char *s, char *supername,int state)
-{//TODO: handle pre,script and quotes
+{
+//TODO: span: exit as soon as we find a right bracket
+//TODO: non html inner text (script, comment, pre): replace mode 3 with mode 4 that just fills inner text
+//TODO: inner text should just be child nodes of a special type
 	//0 tagname 1 propname  2 propval 3 freetext 
-	char *freetext;
+	char *freetext=NULL;
 	int freetextm=0;
 	int typem=0;
 	char **curs=&(t->type);
@@ -73,26 +88,47 @@ char *rtag(tag *t, char *s, char *supername,int state)
 	char **cursn;
 
 	int tm;//used for reallocing property lists entrys
-	//for(state=0;*s&&!(t->closing&&state>=1);s=s+1){
+//	for(state=0;*s&&!(t->closing&&state>=1);s=s+1){
 	for(state=0;*s;s=s+1){
 		switch(*s){
-			case '<': if(state==3){ s=rtag(newchild(t),s+1,t->type,0); if(closed(t)){return s;} break;}
-			case '/': if(state==0){t->closing=1;break;}
-			case '>': if(state<3){state=3;curs=&t->freetext;curm=&freetextm;} else break;
-			case '=': if(state==1){state=2; tm=PRLC; curm=&tm; curs=cursn; break;}if(state!=3)break;
-			case ' ': if(state==2||state==0){//new property, must also alloc value
+			case '<': if(state==3){ 
+				newchildtext(t,freetext);
+				freetextm=0;
+				s=rtag(newchild(t),s+1,t->type,0); 
+				if(closed(t)){return s;} 
+				freetext=NULL;
+				freetextm=0;
+				curs=&freetext;
+				curm=&freetextm;
+				continue; 
+				} break;
+			case '/': if(state==0){t->closing=1;continue;} break;
+			case '>': 
+				if(state<3){
+					state=3;
+					curs=&t->freetext;
+					curm=&freetextm;
+					if(t->closing==1)
+						return s; 
+				} 
+				else break;
+			case '=': if(state==1){state=2; tm=PRLC; curm=&tm; curs=cursn; continue;}break;
+			case ' ': if(state==2||state==0){
+				state=1;
+				//new property, must also alloc name and value
 				t->pn=append(t->pn,&(t->pnm),calloc(sizeof(char),PRLC));
 				tm=PRLC;
 				int tail;
 				for(tail=0;t->pn[tail];tail++);
 				curs=&(t->pn[tail-1]);
 				//alloc value
+				
 				t->pv=append(t->pv,&(t->pvm),calloc(sizeof(char),PRLC));
 				//NOTE: on state 2 we must remember we calloced PRLC elemnts
 				for(tail=0;t->pn[tail];tail++);
 				cursn=&(t->pv[tail-1]);
 				
-			} if(state==1) break; //dont put space in property name
+				} if(state==1) continue; //dont put space in property name
 			default: //some text or name or attribute
 
 				if(!(*curs&&strlen(*curs)<=*curm)){//ensure room for next char, demorgans
@@ -111,13 +147,19 @@ char *rtag(tag *t, char *s, char *supername,int state)
 			break;
 		}
 	}	
+	newchildtext(t,freetext);
 	return s+1;
 }
 void dump(tag *root,int i)
 {
 	int j,k;
 	for(j=0;j<=i;j++)printf(" ");
-	printf("%s:\n",root->type);
+	if(strcmp(root->type,"itf"))
+		printf("%s:\n",root->type);
+	else{
+		printf("%s\n",root->freetext);
+		return;
+	}
 	for(j=0;j<=i;j++)printf(" ");
 	if(root->pn)
 		for(k=0;root->pn[k];k++)
