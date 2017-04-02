@@ -174,8 +174,14 @@ char *rtag(tag *t, char *s, char *supername,int state)
 					}
 					char *u1;
 					char *v1;
-					if(!strncmp(v,t->type,u-v))
+					if(!strncmp(v,t->type,u-v)){
+						tag *c=newchild(t);
+						c->type=calloc(strlen(t->type),1);
+						memcpy(c->type,t->type,strlen(t->type));
+						c->closing=1;
+						
 						return u;
+					}
 				}else
 				break;
 			case '/': if(state==0){t->closing=1;continue;} 

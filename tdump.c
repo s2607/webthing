@@ -71,7 +71,7 @@ int ntos(tag *t,char *a,int n)
 
 		}
 		if(!strcmp(t->type,"script")){//ehhhhhh
-				//suppress=!suppress;//TODO: nested suppressed elements (ehh)
+				suppress=!suppress;//TODO: nested suppressed elements (ehh)
 		}
 		if(!strcmp(t->type,"hr"))
 			ptext(docm,&n,"______","_________________________",MARG);
