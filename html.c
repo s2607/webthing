@@ -158,7 +158,7 @@ char *rtag(tag *t, char *s, char *supername,int state)
 					break;
 				} 
 				else break;
-			case '=': if(state==1){state=2; tm=PRLC; curm=&tm; curs=cursn; continue;}break;
+			case '=': if(state==1){state=2; tm=PRLC; curm=&tm; curs=cursn; continue;}
 			case ' ': if(state==2||state==0){
 				state=1;
 				//new property, must also alloc name and value
