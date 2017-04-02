@@ -104,7 +104,6 @@ int isbaren(char *type)
 char *rtag(tag *t, char *s, char *supername,int state)
 {
 //TODO: non html inner text (script, comment, pre): replace mode 3 with mode 4 that just fills inner text
-//TODO: don't eat syntax characters in raw tags
 	//0 tagname 1 propname  2 propval 3 freetext 
 	char *freetext=NULL;
 	int freetextm=0;
@@ -140,7 +139,7 @@ char *rtag(tag *t, char *s, char *supername,int state)
 						return u;
 				}else
 				break;
-			case '/': if(state==0){t->closing=1;continue;} break;
+			case '/': if(state==0){t->closing=1;continue;} 
 			case '>': 
 				if(state<3){
 					int b=isbaren(t->type);
@@ -157,7 +156,6 @@ char *rtag(tag *t, char *s, char *supername,int state)
 					printf("state:%d b:%d ",state,b);
 					break;
 				} 
-				else break;
 			case '=': if(state==1){state=2; tm=PRLC; curm=&tm; curs=cursn; continue;}
 			case ' ': if(state==2||state==0){
 				state=1;
