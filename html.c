@@ -73,11 +73,38 @@ int closed(tag *t)
 	}
 	return 0;
 }
+int isbaren(char *type)
+{//font is ignored intentionally, DO NOT ADD IT
+//a negative value means the parser should terminate imediately on a close bracket
+//a positive value means the parse should place all of the inner text in  a single text fragment node
+//the main point of this function is to answer the question "can this node have children?" 
+	char *voids[] = {"br","hr","img","link","!--",""};//TODO: correct comment syntex (friggen wacked)
+	char *raws[] = {"script","plaintext",""};//plaintext shouldn't end but whatever
+	int i;
+	if(!type)
+		return -9999;//ehhhh
+	if(*type=='/')
+		type=type+1;
+	printf("t:%s ",type);
+	for(i=1;strlen(voids[i]);i++)
+		if(!strcmp(type,voids[i])) 
+			return -(i+1);
+	printf(" not void\n");
+	for(i=0;strlen(raws[i]);i++)
+		if(!strcmp(type,raws[i])) 
+			return i+1;
+	printf(" not raw\n ");
+	return 0; //a normal node
+	
+
+	/*char *blocks[] = {"pre","p","h1","h2","h3","h4","h5","h6","noscript","div",""};
+	char *inlines[] = {"a","em","strong","code","kbd","samp","var","b","b","i","u","small","s","strike","*/
+}
 
 char *rtag(tag *t, char *s, char *supername,int state)
 {
-//TODO: span: exit as soon as we find a right bracket
 //TODO: non html inner text (script, comment, pre): replace mode 3 with mode 4 that just fills inner text
+//TODO: don't eat syntax characters in raw tags
 	//0 tagname 1 propname  2 propval 3 freetext 
 	char *freetext=NULL;
 	int freetextm=0;
@@ -100,15 +127,34 @@ char *rtag(tag *t, char *s, char *supername,int state)
 				curs=&freetext;
 				curm=&freetextm;
 				continue; 
-				} break;
+				} else if(state == 4){//check for closing raw tag
+					char *u;
+					char *v;
+					for(u=v=s+1;*u&&*u!=' '&&*u!='>';u=u+1){
+						if(*v=='/')
+							v=v+1;
+					}
+					char *u1;
+					char *v1;
+					if(!strncmp(v,t->type,u-v))
+						return u;
+				}else
+				break;
 			case '/': if(state==0){t->closing=1;continue;} break;
 			case '>': 
 				if(state<3){
-					state=3;
+					int b=isbaren(t->type);
+					if(b<0)
+						return s;//void tag like br
+					if(b>0)
+						state=4;
+					else
+						state=3;
 					curs=&t->freetext;
 					curm=&freetextm;
 					if(t->closing==1)
 						return s; 
+					printf("state:%d b:%d ",state,b);
 					break;
 				} 
 				else break;
@@ -174,7 +220,7 @@ void dump(tag *root,int i)
 int main()
 {
 	tag *root=newchild(NULL);
-	rtag(root,"<html><title>hello</title><body> hello world <a href=\"test\"> test </a> </body></html>","!",3);
+	rtag(root,"<html><title>hello</title><body> hello world <hr> wooot! <script> var a=\"<html>blah</html>\"; </script>  <a href=\"test\"> test </a> </body></html>","!",3);
 	dump(root,1);
 	return 0;
 }
