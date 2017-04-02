@@ -16,7 +16,7 @@ void **append(char **l, int *lm, void *a)//put pointer at end of list, growing b
 		return l;
 	int len;
 	for(len=0;(l)[len]&&len<*lm;len++);
-	if(len==*lm){
+	if(len==(*lm)-1){//the extra elment garuntees null terminator
 		l=realloc(l,*lm+PRLC);
 		*lm=*lm+PRLC;
 		int i;
@@ -60,6 +60,58 @@ int closed(tag *t)
 	}
 	return 0;
 }
+tag *sdom(tag *r, int(*v)(tag *,char *,int), char *d, int n)
+{
+	//search/visit the DOM (in order)
+	//visits all dom nodes until v returns FALSE, then returns pointer to that node
+	//n is set to the return value of the v, it may be used for counting
+	if(!r)
+		return NULL;
+	
+	n=v(r,d,n);
+	if(!n)
+		return r;
+	tag *rv;
+	if((r->child)==NULL)
+		return NULL;
+	if(*(r->child)==NULL)
+		return NULL;
+	int i;
+	for(i=0;r->child[i];i++){
+		rv=sdom(r->child[i],v,d,n);
+		if(rv)
+			return rv;
+	}
+	
+	return NULL;
+	
+}
+char **getprop(tag *t,char *n)
+{
+	if(!t)
+		return NULL;
+	if(!t->pn)
+		return NULL;
+	
+	int i;
+	for(i=0;t->pn[i]!=NULL;i++){
+		if(!strcmp(n,t->pn[i]))
+			return &(t->pv[i]);
+	}
+	return NULL;
+}
+int bytype(tag *r, char *t, int n)
+{
+	if(!r)
+		return n;
+	if(!r->type)
+		return n;
+	if(r->closing)
+		return n;
+	if(!strcmp(t,r->type))
+		return n-1;
+	return n;
+}
 int isbaren(char *type)
 {//font is ignored intentionally, DO NOT ADD IT
 //a negative value means the parser should terminate imediately on a close bracket
@@ -72,15 +124,15 @@ int isbaren(char *type)
 		return -9999;//ehhhh
 	if(*type=='/')
 		type=type+1;
-	printf("t:%s ",type);
+	//printf("t:%s ",type);
 	for(i=1;strlen(voids[i]);i++)
 		if(!strcmp(type,voids[i])) 
 			return -(i+1);
-	printf(" not void\n");
+//	printf(" not void\n");
 	for(i=0;strlen(raws[i]);i++)
 		if(!strcmp(type,raws[i])) 
 			return i+1;
-	printf(" not raw\n ");
+//	printf(" not raw\n ");
 	return 0; //a normal node
 	
 
@@ -140,7 +192,7 @@ char *rtag(tag *t, char *s, char *supername,int state)
 					curm=&freetextm;
 					if(t->closing==1)
 						return s; 
-					printf("state:%d b:%d ",state,b);
+					//printf("state:%d b:%d ",state,b);
 					break;
 				} 
 			case '=': if(state==1){state=2; tm=PRLC; curm=&tm; curs=cursn; continue;}
@@ -207,5 +259,8 @@ int main()
 	tag *root=newchild(NULL);
 	rtag(root,"<html><title>hello</title><body> hello world <hr> wooot! <script> var a=\"<html>blah</html>\"; </script>  <a href=\"test\"> test </a> </body></html>","!",3);
 	dump(root,1);
+	char *text=tomarkdown(root);
+	printf("\n%s\n",text);
+	free(text);
 	return 0;
 }
