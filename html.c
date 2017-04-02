@@ -2,20 +2,7 @@
 #include <malloc.h>
 #include <stdio.h>
 #include <string.h>
-typedef struct {
-	int closing;
-	char **pn; //a list of immutable strings
-	int pnm;
-	char **pv; //same but changes sometimes
-	int pvm;
-	char *type;
-	void **child; //a list of these
-	int childm;
-	void *parent;
-	char *freetext;
-} tag;
-//trade space for time
-#define PRLC 100
+#include "html.h"
 
 //lists always grow until they are freed
 void **append(char **l, int *lm, void *a)//put pointer at end of list, growing backing buffer if nescesary
