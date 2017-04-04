@@ -3,6 +3,7 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include "html.h"
+#include <mcheck.h>
 
 #define MARG 6
 //type,descriptor
@@ -11,9 +12,11 @@ char *as(char *s,char *a,int *m)
 {
 	if(!a)
 		return s;
-	if(s==NULL){
-		s=calloc(PRLC,1);
-		*m=PRLC;
+	if(s==NULL){//TODO:some kind of heap corruption is causing this to crash
+		//s=calloc(PRLC,1);
+		//*m=PRLC;
+		s=calloc(strlen(a)+PRLC,1);
+		*m=strlen(a)+PRLC;
 	}
 	if(*m-strlen(s)<strlen(a)){
 		s=realloc(s,*m+strlen(a));
@@ -22,7 +25,7 @@ char *as(char *s,char *a,int *m)
 		for(i=0;i<*m-strlen(s);i++)
 			s[i+strlen(s)]=0;
 	}
-	memcpy(s+strlen(s),a,strlen(a));
+	memcpy(s+strlen(s),a,strlen(a)+1);
 	return s;
 }
 int ptext(char **d, int *dm, char *m, char *s, int i)
@@ -43,14 +46,15 @@ int ptext(char **d, int *dm, char *m, char *s, int i)
 char *hrefs[255];
 int ntos(tag *t,char *a,int n)
 {//n must not be zero (obviously)
-	static islink=0;//must do this
-	static istitle=0;
-	static inbody=0;
-	static inhead=0;
-	static suppress=0;
-	static em=0;
-	static headding=0;
-	static acount=0;
+	//mcheck_check_all();
+	static int islink=0;//must do this
+	static int istitle=0;
+	static int inbody=0;
+	static int inhead=0;
+	static int suppress=0;
+	static int em=0;
+	static int headding=0;
+	static int acount=0;
 	
 	char m[7];
 	if(!t)
@@ -115,12 +119,14 @@ char *tomarkdown(tag *root)
 	int rm=0;
 	r=as(r,"DOCUMENT FOLLOWS\n",&rm);
 	sdom(root,ntos,(char *)&r,rm);
+	printf("%s\n",r);
 	//rm is invalid now, r must be copied and freed to be modified
 	char *t=NULL;
 	rm=0;
 	t=as(t,r,&rm);
 	free(r);
 	r=t;
+	printf("%s\n",r);
 	r=refs(r,&rm,hrefs);
 	return r;
 }

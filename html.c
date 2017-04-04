@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "html.h"
+#include <mcheck.h>
 
 //lists always grow until they are freed
 void **append(char **l, int *lm, void *a)//put pointer at end of list, growing backing buffer if nescesary
@@ -42,10 +43,12 @@ void newchildtext(tag *t,char *it)
 	if(!it)
 		return;
 	tag *r;
+	r=newchild(t);
 	r->type=calloc(4,1);
 	memcpy(r->type,"itf",4);
-	r->freetext=calloc(strlen(it),1);
+	r->freetext=calloc(strlen(it)+1,1);
 	memcpy(r->freetext,it,strlen(it));
+	r->freetext[strlen(it)]=0;
 	free(it);
 }
 int closed(tag *t)
@@ -176,7 +179,7 @@ char *rtag(tag *t, char *s, char *supername,int state)
 					char *v1;
 					if(!strncmp(v,t->type,u-v)){
 						tag *c=newchild(t);
-						c->type=calloc(strlen(t->type),1);
+						c->type=calloc(strlen(t->type)+1,1);
 						memcpy(c->type,t->type,strlen(t->type));
 						c->closing=1;
 						
@@ -252,7 +255,7 @@ void dump(tag *root,int i)
 			printf(" %s=%s",root->pn[k],root->pv[k]);
 	printf("\n");
 	if(root->freetext){
-	for(j=0;j<=i;j++)printf(" ");
+		for(j=0;j<=i;j++)printf(" ");
 		printf("inner: %s\n",root->freetext);
 	}
 	if(root->child)
@@ -262,6 +265,7 @@ void dump(tag *root,int i)
 }
 int main()
 {
+//	mcheck(NULL);
 	tag *root=newchild(NULL);
 	rtag(root,"<html><title>hello</title><body> hello world <hr> wooot! <script> var a=\"<html>blah</html>\"; </script>  <a href=\"test\"> test </a> </body></html>","!",3);
 	dump(root,1);
