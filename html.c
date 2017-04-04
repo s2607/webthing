@@ -185,7 +185,7 @@ char *rtag(tag *t, char *s, char *supername,int state)
 					}
 				}else
 				break;
-			case '/': if(state==0){t->closing=1;continue;} 
+			case '/': if(state==0){t->closing=1;continue;}break; 
 			case '>': 
 				if(state<3){
 					int b=isbaren(t->type);
@@ -200,7 +200,7 @@ char *rtag(tag *t, char *s, char *supername,int state)
 					if(t->closing==1)
 						return s; 
 					//printf("state:%d b:%d ",state,b);
-					break;
+					continue;
 				} 
 			case '=': if(state==1){state=2; tm=PRLC; curm=&tm; curs=cursn; continue;}
 			case ' ': if(state==2||state==0){
@@ -220,27 +220,26 @@ char *rtag(tag *t, char *s, char *supername,int state)
 				continue;
 				
 				} if(state==1) continue; //dont put space in property name
-			default: //some text or name or attribute
+			}//switch
+			//some text or name or attribute
 
-				if(!(*curs&&strlen(*curs)<=*curm-1)){//ensure room for next char, demorgans
-					if(!*curs){
-						*curs=calloc(PRLC,1);
-						*curm=PRLC;
-					}else{
-						char *t=realloc(*curs,*curm+PRLC+1);
-						if(t==NULL)
-							printf("BAD CHEESE!\n");
-						*curs=t;
-						int flen,i;
-						for(i=0;i<PRLC;i++)
-							(*curs)[i+*curm]=0;
-						*curm+=PRLC+1;
-					}
+			if(!(*curs&&strnlen(*curs,*curm)<=*curm-1)){//ensure room for next char, demorgans
+				if(!*curs){
+					*curs=calloc(PRLC,1);
+					*curm=PRLC;
+				}else{
+					char *t=realloc(*curs,*curm+PRLC+1);
+					if(t==NULL)
+						printf("BAD CHEESE!\n");
+					*curs=t;
+					int flen,i;
+					for(i=0;i<PRLC+1;i++)
+						(*curs)[i+*curm]=0;
+					*curm+=PRLC+1;
 				}
-				(*curs)[strlen(*curs)]=*s;
-			break;
-		}
-	}	
+			}
+			(*curs)[strlen(*curs)]=*s;
+	}	//for
 	newchildtext(t,freetext);
 	return s+1;
 }
@@ -248,7 +247,7 @@ void dump(tag *root,int i)
 {
 	int j,k;
 	for(j=0;j<=i;j++)printf(" ");
-	if(strcmp(root->type,"itf"))
+	if(root->type&&strcmp(root->type,"itf"))
 		printf("%s:\n",root->type);
 	for(j=0;j<=i;j++)printf(" ");
 	if(root->pn)
@@ -271,12 +270,14 @@ int main()
 {
 //	mcheck(NULL);
 	tag *root=newchild(NULL);
-	//rtag(root,"<html><title>hello</title><body> hello world <hr> wooot! <script> var a=\"<html>blah</html>\"; </script>  <a href=\"test\"> test </a> </body></html>","!",3);
 	FILE *htdoc;
 	htdoc=fopen("test.html","r");
 	fread(buff,BUFLEN,1,htdoc);
 	fclose(htdoc);
 	rtag(root,buff,"!",3);
+	//rtag(root,"<html><title>hello</title><body> hello world <hr> wooot! <script> var a=\"<html>blah</html>\"; </script>  <a href=\"test\"> test </a> </body></html>","!",3);
+//	rtag(root,"<html><title>hello</title><body> hello/world <a href=\"world/test\"> linkaroo </a></body></html>","!",3);
+	dump(root,1);
 	char *text=tomarkdown(root);
 	printf("\n%s\n",text);
 	free(text);
