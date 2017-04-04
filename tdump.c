@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "html.h"
 #include <mcheck.h>
+#include <unistd.h>
 
 #define MARG 6
 //type,descriptor
@@ -18,14 +19,16 @@ char *as(char *s,char *a,int *m)
 		s=calloc(strlen(a)+PRLC,1);
 		*m=strlen(a)+PRLC;
 	}
-	if(*m-strlen(s)<strlen(a)){
-		s=realloc(s,*m+strlen(a));
-		*m=*m+strlen(a);
+	if(*m-strlen(s)<strlen(a)+1){
+		s=realloc(s,*m+strlen(a)+1);
+		*m=*m+strlen(a)+1;
 		int i=0;
-		for(i=0;i<*m-strlen(s);i++)
+		for(i=0;i<(*m)-strlen(s);i++)
 			s[i+strlen(s)]=0;
 	}
-	memcpy(s+strlen(s),a,strlen(a)+1);
+	s[strlen(s)+strlen(a)]=0;
+	memcpy(s+strlen(s),a,strlen(a));
+	usleep(1*1000*100);
 	return s;
 }
 int ptext(char **d, int *dm, char *m, char *s, int i)
@@ -44,7 +47,7 @@ int ptext(char **d, int *dm, char *m, char *s, int i)
 		
 }
 char *hrefs[255];
-int ntos(tag *t,char *a,int n)
+int ntos(tag *t,char *a,int *nr)
 {//n must not be zero (obviously)
 	//mcheck_check_all();
 	static int islink=0;//must do this
@@ -58,8 +61,9 @@ int ntos(tag *t,char *a,int n)
 	
 	char m[7];
 	if(!t)
-		return n;
+		return 1;
 	char **docm=(char **)a;
+	int n=*nr;
 
 	if(t->type){
 		if(!strcmp(t->type,"a")){
@@ -98,7 +102,8 @@ int ntos(tag *t,char *a,int n)
 		if(t->freetext)
 			ptext(docm,&n,m,t->freetext,MARG);
 	}
-	return n;
+	*nr=n;
+	return 1;
 }
 char *refs(char *d, int *m, char **refs)
 {
@@ -118,15 +123,7 @@ char *tomarkdown(tag *root)
 	char *r=NULL;
 	int rm=0;
 	r=as(r,"DOCUMENT FOLLOWS\n",&rm);
-	sdom(root,ntos,(char *)&r,rm);
-	printf("%s\n",r);
-	//rm is invalid now, r must be copied and freed to be modified
-	char *t=NULL;
-	rm=0;
-	t=as(t,r,&rm);
-	free(r);
-	r=t;
-	printf("%s\n",r);
+	sdom(root,ntos,(char *)&r,&rm);
 	r=refs(r,&rm,hrefs);
 	return r;
 }

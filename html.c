@@ -63,16 +63,14 @@ int closed(tag *t)
 	}
 	return 0;
 }
-tag *sdom(tag *r, int(*v)(tag *,char *,int), char *d, int n)
+tag *sdom(tag *r, int(*v)(tag *,char *,int*), char *d, int *nr)
 {
 	//search/visit the DOM (in order)
 	//visits all dom nodes until v returns FALSE, then returns pointer to that node
-	//n is set to the return value of the v, it may be used for counting
 	if(!r)
 		return NULL;
 	
-	n=v(r,d,n);
-	if(!n)
+	if(!v(r,d,nr))
 		return r;
 	tag *rv;
 	if((r->child)==NULL)
@@ -81,7 +79,7 @@ tag *sdom(tag *r, int(*v)(tag *,char *,int), char *d, int n)
 		return NULL;
 	int i;
 	for(i=0;r->child[i];i++){
-		rv=sdom(r->child[i],v,d,n);
+		rv=sdom(r->child[i],v,d,nr);
 		if(rv)
 			return rv;
 	}
@@ -268,7 +266,6 @@ int main()
 //	mcheck(NULL);
 	tag *root=newchild(NULL);
 	rtag(root,"<html><title>hello</title><body> hello world <hr> wooot! <script> var a=\"<html>blah</html>\"; </script>  <a href=\"test\"> test </a> </body></html>","!",3);
-	dump(root,1);
 	char *text=tomarkdown(root);
 	printf("\n%s\n",text);
 	free(text);
