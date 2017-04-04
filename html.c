@@ -154,7 +154,7 @@ char *rtag(tag *t, char *s, char *supername,int state)
 
 	int tm;//used for reallocing property lists entrys
 //	for(state=0;*s&&!(t->closing&&state>=1);s=s+1){
-	for(state=0;*s;s=s+1){
+	for(;*s;s=s+1){
 		switch(*s){
 			case '<': if(state==3){ 
 				newchildtext(t,freetext);
@@ -222,16 +222,19 @@ char *rtag(tag *t, char *s, char *supername,int state)
 				} if(state==1) continue; //dont put space in property name
 			default: //some text or name or attribute
 
-				if(!(*curs&&strlen(*curs)<=*curm)){//ensure room for next char, demorgans
+				if(!(*curs&&strlen(*curs)<=*curm-1)){//ensure room for next char, demorgans
 					if(!*curs){
 						*curs=calloc(PRLC,1);
 						*curm=PRLC;
 					}else{
-						*curs=realloc(*curs,*curm+PRLC);
+						char *t=realloc(*curs,*curm+PRLC+1);
+						if(t==NULL)
+							printf("BAD CHEESE!\n");
+						*curs=t;
 						int flen,i;
 						for(i=0;i<PRLC;i++)
-							*curs[i+*curm]=0;
-						*curm+=PRLC;
+							(*curs)[i+*curm]=0;
+						*curm+=PRLC+1;
 					}
 				}
 				(*curs)[strlen(*curs)]=*s;
@@ -261,11 +264,19 @@ void dump(tag *root,int i)
 			dump(root->child[k],i+1);
 	
 }
+#define BUFLEN 64000
+//aught to be enough 
+char buff[BUFLEN];//doing it this way for now, garunteed null terminator
 int main()
 {
 //	mcheck(NULL);
 	tag *root=newchild(NULL);
-	rtag(root,"<html><title>hello</title><body> hello world <hr> wooot! <script> var a=\"<html>blah</html>\"; </script>  <a href=\"test\"> test </a> </body></html>","!",3);
+	//rtag(root,"<html><title>hello</title><body> hello world <hr> wooot! <script> var a=\"<html>blah</html>\"; </script>  <a href=\"test\"> test </a> </body></html>","!",3);
+	FILE *htdoc;
+	htdoc=fopen("test.html","r");
+	fread(buff,BUFLEN,1,htdoc);
+	fclose(htdoc);
+	rtag(root,buff,"!",3);
 	char *text=tomarkdown(root);
 	printf("\n%s\n",text);
 	free(text);

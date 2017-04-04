@@ -28,7 +28,7 @@ char *as(char *s,char *a,int *m)
 	}
 	s[strlen(s)+strlen(a)]=0;
 	memcpy(s+strlen(s),a,strlen(a));
-	usleep(1*1000*100);
+//	usleep(1*1000*100);
 	return s;
 }
 int ptext(char **d, int *dm, char *m, char *s, int i)
@@ -58,6 +58,8 @@ int ntos(tag *t,char *a,int *nr)
 	static int em=0;
 	static int headding=0;
 	static int acount=0;
+	static int islist=0;
+	static int lcount=0;
 	
 	char m[7];
 	if(!t)
@@ -78,11 +80,35 @@ int ntos(tag *t,char *a,int *nr)
 			}
 
 		}
+		if(!strcmp(t->type,"img")){
+			char **p=getprop(t,"src");
+			islink=1;
+			if(p!=NULL)
+				hrefs[acount]=*p;
+			acount=acount+1;
+			ptext(docm,&n,"i","img",MARG);
+
+		}
+		if(!strcmp(t->type,"ul")){
+			islist=1;
+			ptext(docm,&n,"","\n",MARG);
+		
+		}
+		if(!strcmp(t->type,"li")){
+			if(t->closing){
+				if(islist>2){
+					islist=islist-2;
+				}
+			}
+			if(islist==2)
+				lcount=lcount+1;
+			islist=islist+2;
+		}
 		if(!strcmp(t->type,"script")){//ehhhhhh
-				suppress=!suppress;//TODO: nested suppressed elements (ehh)
+				suppress=!suppress;//TODO: nested suppressed elements (ehh) (no, that wont work)
 		}
 		if(!strcmp(t->type,"hr"))
-			ptext(docm,&n,"______","_________________________",MARG);
+			ptext(docm,&n,"______","_________________________\n",MARG);
 		
 		if(!strcmp(t->type,"br"))
 			ptext(docm,&n," |P","",MARG);
@@ -99,6 +125,12 @@ int ntos(tag *t,char *a,int *nr)
 			m[0]=' ';
 		if(islink)
 			m[1]='0'+acount;//TODO:insanely crappy
+		else
+			m[1]=' ';
+		if(islist>2)
+			m[2]='*';
+		else
+			m[2]=' ';
 		if(t->freetext)
 			ptext(docm,&n,m,t->freetext,MARG);
 	}
