@@ -68,7 +68,7 @@ int ntos(tag *t,char *a,int *nr)
 	int n=*nr;
 
 	if(t->type){
-		if(!strcmp(t->type,"a")){
+		if(!strcasecmp(t->type,"a")){
 			if(t->closing)
 				islink=0;
 			else{
@@ -80,7 +80,7 @@ int ntos(tag *t,char *a,int *nr)
 			}
 
 		}
-		if(!strcmp(t->type,"img")){
+		if(!strcasecmp(t->type,"img")){
 			char **p=getprop(t,"src");
 			islink=1;
 			if(p!=NULL)
@@ -89,12 +89,12 @@ int ntos(tag *t,char *a,int *nr)
 			ptext(docm,&n,"i","img",MARG);
 
 		}
-		if(!strcmp(t->type,"ul")){
+		if(!strcasecmp(t->type,"ul")){
 			islist=1;
 			ptext(docm,&n,"","\n",MARG);
 		
 		}
-		if(!strcmp(t->type,"li")){
+		if(!strcasecmp(t->type,"li")){
 			if(t->closing){
 				if(islist>2){
 					islist=islist-2;
@@ -104,13 +104,13 @@ int ntos(tag *t,char *a,int *nr)
 				lcount=lcount+1;
 			islist=islist+2;
 		}
-		if(!strcmp(t->type,"script")){//ehhhhhh
+		if(!strcasecmp(t->type,"script")){//ehhhhhh
 				suppress=!suppress;//TODO: nested suppressed elements (ehh) (no, that wont work)
 		}
-		if(!strcmp(t->type,"hr"))
+		if(!strcasecmp(t->type,"hr"))
 			ptext(docm,&n,"______","_________________________\n",MARG);
 		
-		if(!strcmp(t->type,"br"))
+		if(!strcasecmp(t->type,"br"))
 			ptext(docm,&n," |P","",MARG);
 		//*docm=as(*docm,t->type,&n);
 	}

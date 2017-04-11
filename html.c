@@ -57,7 +57,7 @@ int closed(tag *t)
 	for(len=0;t->child[len];len++){
 		tag *c=(tag *)t->child[len];
 		if(c->closing){
-			if(!strcmp(t->type,c->type))
+			if(!strcasecmp(t->type,c->type))
 				return 1;
 		}
 	}
@@ -96,7 +96,7 @@ char **getprop(tag *t,char *n)
 	
 	int i;
 	for(i=0;t->pn[i]!=NULL;i++){
-		if(!strcmp(n,t->pn[i]))
+		if(!strcasecmp(n,t->pn[i]))
 			return &(t->pv[i]);
 	}
 	return NULL;
@@ -109,7 +109,7 @@ int bytype(tag *r, char *t, int n)
 		return n;
 	if(r->closing)
 		return n;
-	if(!strcmp(t,r->type))
+	if(!strcasecmp(t,r->type))
 		return n-1;
 	return n;
 }
@@ -127,11 +127,11 @@ int isbaren(char *type)
 		type=type+1;
 	//printf("t:%s ",type);
 	for(i=1;strlen(voids[i]);i++)
-		if(!strcmp(type,voids[i])) 
+		if(!strcasecmp(type,voids[i])) 
 			return -(i+1);
 //	printf(" not void\n");
 	for(i=0;strlen(raws[i]);i++)
-		if(!strcmp(type,raws[i])) 
+		if(!strcasecmp(type,raws[i])) 
 			return i+1;
 //	printf(" not raw\n ");
 	return 0; //a normal node
@@ -175,7 +175,7 @@ char *rtag(tag *t, char *s, char *supername,int state)
 					}
 					char *u1;
 					char *v1;
-					if(!strncmp(v,t->type,u-v)){
+					if(!strncasecmp(v,t->type,u-v)){
 						tag *c=newchild(t);
 						c->type=calloc(strlen(t->type)+1,1);
 						memcpy(c->type,t->type,strlen(t->type));
@@ -247,7 +247,7 @@ void dump(tag *root,int i)
 {
 	int j,k;
 	for(j=0;j<=i;j++)printf(" ");
-	if(root->type&&strcmp(root->type,"itf"))
+	if(root->type&&strcasecmp(root->type,"itf"))
 		printf("%s:\n",root->type);
 	for(j=0;j<=i;j++)printf(" ");
 	if(root->pn)
