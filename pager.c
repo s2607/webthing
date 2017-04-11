@@ -1,6 +1,6 @@
 #include <stdio.h>
+#include "pager.h"
 
-typedef int (*mfp)(char *);
 char *startof(char *s, int l)
 {
 	char *o=s;
@@ -53,14 +53,14 @@ void ppage(char *s, int p)
 	}
 	printf("\nLines: %d,%d >",p*20,b);
 }
-int nullmenu(char *s)
+int nullmenu(char *s, int *a, char *b)
 {
 	if(*s=='q')
 		return -1;
 	return 0;
 }
 #define BUFFLEN 16000
-void pagethrough(char *s,mfp m)
+void pagethrough(char *s,mfp m,char *b)
 {
 	int p=0;
 	char buff[BUFFLEN];
@@ -74,12 +74,12 @@ void pagethrough(char *s,mfp m)
 		p++;
 		gets(buff);
 		int r=0;
-		if(*buff&&!(r=m(buff))&&!buff[1]){
+		if(*buff&&!(r=m(buff,&p,b))&&!buff[1]){
 			if(r<0)
 				return;
 			switch(*buff){
 				case 'b':p=p-2;continue;
-				case '?':printf("enter page down, b page up\n");m('?');continue;
+				case '?':printf("enter page down, b page up\n");m('?',&p,b);continue;
 				case 'g':p=0;break;
 				case 'G':p=lcount(s)/20;break;
 				default: printf("No command %s\n",buff);continue;
@@ -87,19 +87,7 @@ void pagethrough(char *s,mfp m)
 		}
 		if(r<0)
 			return;
-		if(r==0)
+		if(r==0&&*buff)
 			printf("No command:%s\n",buff);
 	}
-}
-int main(int argc, char **argv)
-{
-	char buff[BUFFLEN];
-	if(argc!=2)
-		return 1;
-	FILE *fh;
-	fh=fopen(argv[1],"r");
-	fread(buff,BUFFLEN,1,fh);
-	fclose(fh);
-	pagethrough(buff,NULL);
-	return 0;
 }

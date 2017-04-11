@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "html.h"
-#include <mcheck.h>
+#include "pager.h"
 
 //lists always grow until they are freed
 void **append(char **l, int *lm, void *a)//put pointer at end of list, growing backing buffer if nescesary
@@ -279,7 +279,7 @@ int main()
 //	rtag(root,"<html><title>hello</title><body> hello/world <a href=\"world/test\"> linkaroo </a></body></html>","!",3);
 	dump(root,1);
 	char *text=tomarkdown(root);
-	printf("\n%s\n",text);
+	pagethrough(text,NULL,NULL);
 	free(text);
 	return 0;
 }
