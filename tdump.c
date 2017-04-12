@@ -165,3 +165,11 @@ char *tomarkdown(tag *root)
 	return r;
 }
 
+char *getref(int n)
+{
+	while(n&&hrefs[n])
+		n--;
+	if(n)
+		return NULL;
+	return hrefs[n];
+}

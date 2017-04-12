@@ -53,14 +53,14 @@ void ppage(char *s, int p)
 	}
 	printf("\nLines: %d,%d >",p*20,b);
 }
-int nullmenu(char *s, int *a, char *b)
+int nullmenu(char *s, int *a, char **b)
 {
 	if(*s=='q')
 		return -1;
 	return 0;
 }
 #define BUFFLEN 16000
-void pagethrough(char *s,mfp m,char *b)
+void pagethrough(char *s,mfp m,char **b)
 {
 	int p=0;
 	char buff[BUFFLEN];

@@ -4,6 +4,7 @@
 #include <string.h>
 #include "html.h"
 #include "pager.h"
+#include "net.h"
 
 //lists always grow until they are freed
 void **append(char **l, int *lm, void *a)//put pointer at end of list, growing backing buffer if nescesary
@@ -263,17 +264,60 @@ void dump(tag *root,int i)
 			dump(root->child[k],i+1);
 	
 }
-int main(int argc, char **argv)
+int linkmenu(char *c,int *p,char **u)
+{
+	if(*c=='?'){
+		printf("Type a refrence number to jump there.\n");
+		printf("Type a u followed by a url to go there\n");
+		printf("Type a h to view history\n");
+		return 1;
+	}
+	if(getref(atoi(c))!=NULL){
+		char *n=getref(atoi(c));
+		printf("selected %d, %s\n",atoi(c),n);
+		*u=calloc(strlen(n),1);
+		memcpy(*u,n,strlen(n));
+		return -1;
+	}
+	return 0;
+}
+char *viewpage(char *url, char *oldurl)
 {
 	char *t;
-	if(!initcurl()||argc!=2)
-		return -1;
-	gettexturl(&t,argv[1]);
+	char *u=url;
+
+	gettexturl(&t,oldurl,u);
 	tag *root=newchild(NULL);
 	rtag(root,t,"!",3);
 	char *text=tomarkdown(root);
-	pagethrough(text,NULL,NULL);
+	char *ut;
+	pagethrough(text,linkmenu,&ut);
+
 	free(t);
 	free(text);
+	return ut;
+}
+void bloop(char *starturl)
+{
+	char *u=calloc(strlen(starturl),1);
+	memcpy(u,starturl,strlen(starturl));
+	char *o=calloc(strlen(starturl),1);
+	memcpy(o,starturl,strlen(starturl));
+	char *n=u;
+	
+	while(n){
+		n=viewpage(n,o);
+		free(o);
+		o=u;
+		u=n;
+	}
+}
+int main(int argc, char **argv)
+{
+	if(!initcurl()||argc!=2);
+		//return -1;
+	//viewpage(argv[1]);
+	bloop("swiley.net");
+	endcurl();
 	return 0;
 }

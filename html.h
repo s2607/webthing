@@ -30,4 +30,5 @@ char **getprop(tag *,char *);
 char *as(char *,char *,int *);
 char *asn(char *,int n, char *,int *);
 char *tomarkdown(tag *);
+char *getref(int);
 #endif
