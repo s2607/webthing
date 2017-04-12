@@ -263,23 +263,17 @@ void dump(tag *root,int i)
 			dump(root->child[k],i+1);
 	
 }
-#define BUFLEN 64000
-//aught to be enough 
-char buff[BUFLEN];//doing it this way for now, garunteed null terminator
-int main()
+int main(int argc, char **argv)
 {
-//	mcheck(NULL);
+	char *t;
+	if(!initcurl()||argc!=2)
+		return -1;
+	gettexturl(&t,argv[1]);
 	tag *root=newchild(NULL);
-	FILE *htdoc;
-	htdoc=fopen("test.html","r");
-	fread(buff,BUFLEN,1,htdoc);
-	fclose(htdoc);
-	rtag(root,buff,"!",3);
-	//rtag(root,"<html><title>hello</title><body> hello world <hr> wooot! <script> var a=\"<html>blah</html>\"; </script>  <a href=\"test\"> test </a> </body></html>","!",3);
-//	rtag(root,"<html><title>hello</title><body> hello/world <a href=\"world/test\"> linkaroo </a></body></html>","!",3);
-	dump(root,1);
+	rtag(root,t,"!",3);
 	char *text=tomarkdown(root);
 	pagethrough(text,NULL,NULL);
+	free(t);
 	free(text);
 	return 0;
 }

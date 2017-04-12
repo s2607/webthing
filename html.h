@@ -28,5 +28,6 @@ char **getprop(tag *,char *);
 //TODO: property dictionary delete
 
 char *as(char *,char *,int *);
+char *asn(char *,int n, char *,int *);
 char *tomarkdown(tag *);
 #endif

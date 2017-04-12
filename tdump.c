@@ -9,27 +9,32 @@
 #define MARG 6
 //type,descriptor
 
-char *as(char *s,char *a,int *m)
+char *as(char *d, char *s, int *m)
 {
-	if(!a)
-		return s;
-	if(s==NULL){//TODO:some kind of heap corruption is causing this to crash
+	int l=strlen(s);
+	return asn(s,l,d,m);
+}
+char *asn(char *source,int n,char *dest,int *m)
+{
+	if(!source)
+		return dest;
+	if(dest==NULL){//TODO:some kind of heap corruption is causing this to crash
 		//s=calloc(PRLC,1);
 		//*m=PRLC;
-		s=calloc(strlen(a)+PRLC,1);
-		*m=strlen(a)+PRLC;
+		dest=calloc(n+PRLC,1);
+		*m=n+PRLC;
 	}
-	if(*m-strlen(s)<strlen(a)+1){
-		s=realloc(s,*m+strlen(a)+1);
-		*m=*m+strlen(a)+1;
+	if(*m-strlen(dest)<n+1){
+		dest=realloc(dest,*m+n+1);
+		*m=*m+n+1;
 		int i=0;
-		for(i=0;i<(*m)-strlen(s);i++)
-			s[i+strlen(s)]=0;
+		for(i=0;i<(*m)-strlen(dest);i++)
+			dest[i+strlen(dest)]=0;
 	}
-	s[strlen(s)+strlen(a)]=0;
-	memcpy(s+strlen(s),a,strlen(a));
+	dest[strlen(dest)+n]=0;
+	memcpy(dest+strlen(dest),source,n);
 //	usleep(1*1000*100);
-	return s;
+	return dest;
 }
 int ptext(char **d, int *dm, char *m, char *s, int i)
 {//TODO: wrap
