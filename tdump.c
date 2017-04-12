@@ -80,7 +80,7 @@ int ntos(tag *t,char *a,int *nr)
 				char **p=getprop(t,"href");
 				islink=1;
 				if(p!=NULL)
-					hrefs[acount]=*p;
+					hrefs[acount]=scrubquotes(*p);
 				acount=acount+1;
 			}
 

@@ -27,8 +27,10 @@ char **getprop(tag *,char *);
 //TODO: get element by id
 //TODO: property dictionary delete
 
+char *scrubquotes(char *);
 char *as(char *,char *,int *);
 char *asn(char *,int n, char *,int *);
 char *tomarkdown(tag *);
 char *getref(int);
+
 #endif

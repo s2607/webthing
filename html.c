@@ -28,6 +28,19 @@ void **append(char **l, int *lm, void *a)//put pointer at end of list, growing b
 	(l)[len]=a;
 	return l;
 }
+char *scrubquotes(char *s)
+{
+	char *a=s;
+	char *b=strlen(s);
+	if(*a=='"')
+		a=a+1;
+	if(*b=='"')
+		b=b-1;
+	char *r;
+	r=calloc(b-a,1);
+	memcpu(r,a,b-a);
+	return r;
+}
 
 tag *newchild(tag *t)
 {
