@@ -295,7 +295,7 @@ int linkmenu(char *c,int *p,char **u)
 	}
 	return 0;
 }
-char *viewpage(char *url, char *oldurl)
+/*char *viewpage(char *url, char *oldurl)
 {
 	char *t;
 	char *u=url;
@@ -310,21 +310,30 @@ char *viewpage(char *url, char *oldurl)
 	free(t);
 	free(text);
 	return ut;
-}
+}*/
 void bloop(char *starturl)
 {
 	char *u=calloc(strlen(starturl),1);
 	memcpy(u,starturl,strlen(starturl));
 	char *o=calloc(strlen(starturl),1);
 	memcpy(o,starturl,strlen(starturl));
-	char *n=u;
+	//char *n=u;
 	
-	while(n){
+	/*while(n){
 		n=viewpage(n,o);
 		free(o);
 		o=u;
 		u=n;
-	}
+	}*///that pager sucked
+	char *t;
+	gettexturl(&t,o,u);
+	tag *root=newchild(NULL);
+	rtag(root,t,"!",3);
+	char *text=tops(root);
+	char *ut;
+	//tdump();
+	free(t);
+	free(text);
 }
 int main(int argc, char **argv)
 {

@@ -36,21 +36,29 @@ char *asn(char *source,int n,char *dest,int *m)
 //	usleep(1*1000*100);
 	return dest;
 }
-int ptext(char **d, int *dm, char *m, char *s, int i)
-{//TODO: wrap
-	int is;
-	char tm[MARG+1];
-	*d=as(*d,m,dm);
-	for(is=0;is<i-strlen(m);is++){
-		tm[is]=' ';
-	}
-	tm[is]=0;
-	*d=as(*d,tm,dm);
-	*d=as(*d,s,dm);
-	*d=as(*d,"\n",dm);
-	return 0;
-		
+int stackstrings=0;
+int emithr(void) {
+	fputs(" sethr\n",stdout);
 }
+int emitbr(void) {
+	fputs(" newline\n ",stdout);
+}
+int emitset(char *s) {
+	fputs(" set",stdout);
+	fputs(s,stdout);
+	fputs("\n ",stdout);
+	stackstrings=0;
+	return 0;
+}
+int emitstring(char *s, char *t) {
+	if(stackstrings)emitset(t);
+	fputs(" (",stdout);
+	fputs(s,stdout);
+	fputs(") ",stdout);
+	stackstrings=1;
+	return 0;
+}
+
 char *hrefs[255];
 int ntos(tag *t,char *a,int *nr)
 {//n must not be zero (obviously)
@@ -74,9 +82,10 @@ int ntos(tag *t,char *a,int *nr)
 
 	if(t->type){
 		if(!strcasecmp(t->type,"a")){
-			if(t->closing)
+			if(t->closing){
 				islink=0;
-			else{
+				emitset("l");
+			} else{
 				char **p=getprop(t,"href");
 				islink=1;
 				if(p!=NULL)
@@ -91,12 +100,14 @@ int ntos(tag *t,char *a,int *nr)
 			if(p!=NULL)
 				hrefs[acount]=*p;
 			acount=acount+1;
-			ptext(docm,&n,"i","img",MARG);
+			//ptext(docm,&n,"i","img",MARG);
+			emitstring("[image]","p");
 
 		}
 		if(!strcasecmp(t->type,"ul")){
 			islist=1;
-			ptext(docm,&n,"","\n",MARG);
+			//ptext(docm,&n,"","\n",MARG);
+			emitstring("[list]","p");
 		
 		}
 		if(!strcasecmp(t->type,"li")){
@@ -113,16 +124,18 @@ int ntos(tag *t,char *a,int *nr)
 				suppress=!suppress;//TODO: nested suppressed elements (ehh) (no, that wont work)
 		}
 		if(!strcasecmp(t->type,"hr"))
-			ptext(docm,&n,"______","_________________________\n",MARG);
+		//	ptext(docm,&n,"______","_________________________\n",MARG);
+			emithr();
 		
 		if(!strcasecmp(t->type,"br"))
-			ptext(docm,&n," |P","",MARG);
+			//ptext(docm,&n," |P","",MARG);
+			emitbr();
 		//*docm=as(*docm,t->type,&n);
 	}
 	//actuall text content rendering goes here
 	if(!suppress){
 		int j;
-		for(j=0;j<7;j++)
+		/*for(j=0;j<7;j++)
 			m[j]=0;
 		if(inhead)	
 			m[0]='=';
@@ -135,14 +148,15 @@ int ntos(tag *t,char *a,int *nr)
 		if(islist>2)
 			m[2]='*';
 		else
-			m[2]=' ';
+			m[2]=' ';*/
 		if(t->freetext)
-			ptext(docm,&n,m,t->freetext,MARG);
+			//ptext(docm,&n,m,t->freetext,MARG);
+			emitstring(t->freetext,islink?"p":"l");
 	}
 	*nr=n;
 	return 1;
 }
-char *refs(char *d, int *m, char **refs)
+/*char *refs(char *d, int *m, char **refs)
 {
 	int i;
 	char *t;
@@ -154,14 +168,14 @@ char *refs(char *d, int *m, char **refs)
 		free(t);
 	}
 	return d;
-}
-char *tomarkdown(tag *root)
+}*/
+char *tops(tag *root)
 {
 	char *r=NULL;
 	int rm=0;
-	r=as(r,"DOCUMENT FOLLOWS\n",&rm);
+	r=as(r,"\%hdoc\n",&rm);
 	sdom(root,ntos,(char *)&r,&rm);
-	r=refs(r,&rm,hrefs);
+	//r=refs(r,&rm,hrefs);
 	return r;
 }
 
