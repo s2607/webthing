@@ -11,7 +11,7 @@ int hasmethod(char *u)
 		if(*u=='/')
 			break;
 		if(*u=='.')
-			break;//specificially does not correctly handle the url "google" or any other google based urls
+			break;//specificially does not correctly handle the url "google" or any other google based urls 
 		if(*u==':')
 			return 1+u-o;
 	}
@@ -38,7 +38,7 @@ int hasport(char *u)
 
 int hasresource(char *u)
 {
-	int b=hasmethod(u);
+	int b=hasmethod(u)+2;
 	int c=hasport(u);
 	if(!c)
 		c=b;
@@ -74,7 +74,7 @@ int atourl(char *u, parsedurl *pu)
 	if(!be) {be=strlen(u+bb);}
 	if(be&&be-bb){
 		pu->base=calloc(1+be-bb,1);
-		memcpy(pu->base,u+bb,be-bb-4);
+		memcpy(pu->base,u+bb,be-bb);
 	}
 	pu->port=80;//TODO:port
 	int pb=be-3;
@@ -89,14 +89,14 @@ int atourl(char *u, parsedurl *pu)
 }
 char *cleanurl(char *o,char *n)
 {
-	parsedurl *old=NULL;
-	parsedurl *new=NULL;
+	parsedurl *old=calloc(sizeof(parsedurl),1);
+	parsedurl *new=calloc(sizeof(parsedurl),1);
 	char *ret=NULL;
 	int retsize=0;
 	int i=0;
 	atourl(n,new);
 	if(new->method!=NULL){
-		retsize=calloc(strlen(n),1);
+		ret=calloc(retsize=strlen(n),1);
 		memcpy(ret,n,retsize);
 	}else if(atourl(o,old)){
 		if(old->method!=NULL){
@@ -115,7 +115,8 @@ char *cleanurl(char *o,char *n)
 		if(new->base!=NULL)
 			strncpy(ret+i,old->base,retsize-i);
 		i=strlen(ret);
-			strncpy(ret+i,n,retsize-i);
+		strncpy(ret+i,n,retsize-i);
 		
 	}
+	return ret;
 }

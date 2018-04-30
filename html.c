@@ -331,7 +331,7 @@ int main(int argc, char **argv)
 	if(!initcurl()||argc!=2);
 		//return -1;
 	//viewpage(argv[1]);
-	bloop("swiley.net");
+	bloop("http://swiley.net");
 	endcurl();
 	return 0;
 }
