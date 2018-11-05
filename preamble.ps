@@ -1,0 +1,67 @@
+%!PS
+%/cmbsy6
+%20 selectfont
+
+%user config
+/tfont /cmbsy6 def
+/tpoint 20 def
+/pfont {/tfont tpoint}  def
+/h1font {/P052-Bold tpoint 1.5 mul} def
+/h2font {/P052-BoldItalic tpoint 1.2 mul} def
+/h3font {/P052-Italic tpoint 1.2 mul} def
+/h4font {/P052-Italic tpoint 1 mul} def
+/h5font {h4font} def
+%end user config
+
+%typesetting utils
+%some of these are taken from the book "Practical Postscript"
+
+%/textbox { /LM {/lm exch def} def 0 LM % left textbox margin /TM {/tm exch def} def 470 TM % top margin = 6.5" textbox height /RM {/rm exch def} def 300 RM % right margin = 4.125" textlength /BM {/bm exch def} def 0 BM % textbox bottom margin /LG {/lg exch def} def 12 LG % default linespacing rom lm tm moveto } def
+/LM {/lm exch def} def 0 LM
+% left textbox margin
+/TM {/tm exch def} def 470 TM
+% top margin = 6.5" textbox height
+/RM {/rm exch def} def 300 RM
+%/RM 300 def
+% right margin = 4.125" textlength
+/BM {/bm exch def} def 0 BM
+% textbox bottom margin
+/LG {/lg exch def} def 12 LG
+%linespacing
+/textbox { /lm 10 def /tm 722 def /rm 600 def /bm 0 def  /lg tpoint def lm tm moveto } def
+/newline { tm lg sub /tm exch def lm tm moveto } def
+/center { dup stringwidth pop 2 div rm lm sub 2 div exch sub lm add tm moveto } def
+
+%Rob from comp.lang.postscript modified by me
+% Is the word too long for the space on the line?
+/toofar? { dup stringwidth  pop currentpoint pop add rm gt } bind def
+% Show a word, line wrap if needed
+/showword { toofar? { newline } if show} def
+% Show text, line wrap if needed
+% in a loop, break by spaces, and print each word.  If there isn't a
+%space left, be done.
+/S { {( ) search exch showword not {exit} if show} loop} def
+
+%My stuff:
+/setp { pfont selectfont S } def
+/seth1 { newline h1font selectfont center show newline } def
+/seth2 { newline h2font selectfont show newline } def
+/seth3 { newline h3font selectfont show newline } def
+/seth4 { newline (  ) show h4font selectfont show } def
+/seth5 { newline  show h5font selectfont show } def
+/setl { 0 0 1 setrgbcolor setp 0 0 0 setrgbcolor } def
+/setbul { (   ) show show setp} def
+%/setrule {newline currentpoint  newpath moveto currentpoint lineto currentpoint exch pop rm lineto closepath 0.1 setlinewidth stroke } def
+/setrule {  gsave currentpoint exch pop lm exch lineto currentpoint exch pop rm exch lineto 0 setgray 0.1 setlinewidth stroke grestore newline } def
+%end typesetting utils
+textbox
+(This is a heading) seth1
+(This is a first paragraph) setp
+newline
+setrule (That was a horizantal rule) setp
+(This is a level2 heading) seth2
+(Hello world! This is hopefully anough text to triger the linewrap function and spit some stuff out on the new line test test test test test I wish I knew the Lorem text so I could write it out here test test test test) setp
+(This is a level 4 heading) seth4
+(Note that it is displayed along with it's paragraph) setp
+(also note that calling setp many times will note actually seperate paragraphs) setp
+(this is a hyperlink) setl (and this is more text) setp

@@ -331,7 +331,7 @@ void bloop(char *starturl)
 	rtag(root,t,"!",3);
 	char *text=tops(root);
 	char *ut;
-	tdump();
+	//tdump();
 	free(t);
 	free(text);
 }
