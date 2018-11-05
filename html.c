@@ -5,29 +5,8 @@
 #include "html.h"
 #include "pager.h"
 #include "net.h"
+#include "tdump.h"
 
-//lists always grow until they are freed
-void **append(char **l, int *lm, void *a)//put pointer at end of list, growing backing buffer if nescesary
-//so much void *
-{
-	if(!l){
-		l=calloc(PRLC,sizeof(char *));
-		*lm=PRLC;
-	}
-	if(!a)
-		return l;
-	int len;
-	for(len=0;(l)[len]&&len<*lm;len++);
-	if(len==(*lm)-1){//the extra elment garuntees null terminator
-		l=realloc(l,*lm+PRLC);
-		*lm=*lm+PRLC;
-		int i;
-		for(i=0;i<PRLC;i++)
-			(l)[*lm+i]=NULL;
-	}
-	(l)[len]=a;
-	return l;
-}
 char *scrubquotes(char *s)
 {
 	char *a=s;
@@ -221,14 +200,14 @@ char *rtag(tag *t, char *s, char *supername,int state)
 			case ' ': if(state==2||state==0){
 				state=1;
 				//new property, must also alloc name and value
-				t->pn=append(t->pn,&(t->pnm),calloc(sizeof(char),PRLC));
+				t->pn=slappend(t->pn,&(t->pnm),calloc(sizeof(char),PRLC));
 				tm=PRLC;
 				int tail;
 				for(tail=0;t->pn[tail];tail++);
 				curs=&(t->pn[tail-1]);
 				//alloc value
 				
-				t->pv=append(t->pv,&(t->pvm),calloc(sizeof(char),PRLC));
+				t->pv=slappend(t->pv,&(t->pvm),calloc(sizeof(char),PRLC));
 				//NOTE: on state 2 we must remember we calloced PRLC elemnts
 				for(tail=0;t->pn[tail];tail++);
 				cursn=&(t->pv[tail-1]);

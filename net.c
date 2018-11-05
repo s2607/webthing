@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <curl/curl.h>
+#include <string.h>
 #include "html.h"
 #include "url.h"
 

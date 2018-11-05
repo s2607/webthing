@@ -2,4 +2,4 @@
 
 
 
-cc -g url.c html.c tdump.c pager.c net.c -lcurl -o web
+cc -g lists.c url.c html.c tdump.c net.c -lcurl -o web
