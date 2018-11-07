@@ -2,6 +2,7 @@
 #include <malloc.h>
 #include <stdio.h>
 #include <string.h>
+#include <curl/curl.h>
 #include "html.h"
 #include "pager.h"
 #include "net.h"
@@ -292,24 +293,12 @@ int linkmenu(char *c,int *p,char **u)
 }*/
 void bloop(char *starturl)
 {
-	char *u=calloc(strlen(starturl),1);
-	memcpy(u,starturl,strlen(starturl));
-	char *o=calloc(strlen(starturl),1);
-	memcpy(o,starturl,strlen(starturl));
-	//char *n=u;
-	
-	/*while(n){
-		n=viewpage(n,o);
-		free(o);
-		o=u;
-		u=n;
-	}*///that pager sucked
-	char *t;
-	gettexturl(&t,o,u);
+	char *t=NULL;
+	CURLU *oldurl=NULL;
+	gettexturl(&t,&oldurl,starturl);
 	tag *root=newchild(NULL);
 	rtag(root,t,"!",3);
 	char *text=tops(root);
-	char *ut;
 	//tdump();
 	free(t);
 	free(text);
@@ -320,6 +309,7 @@ int main(int argc, char **argv)
 		//return -1;
 	//viewpage(argv[1]);
 	bloop("http://swiley.net");
+//	bloop("http://192.30.252.153");
 	endcurl();
 	return 0;
 }
