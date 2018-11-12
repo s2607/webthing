@@ -58,7 +58,7 @@ int closed(tag *t)
 	}
 	return 0;
 }
-tag *sdom(tag *r, int(*v)(tag *,char *,int*), char *d, int *nr)
+tag *sdom(tag *r, int(*v)(tag *,char **,int*), char **d, int *nr)
 {
 	//search/visit the DOM (in order)
 	//visits all dom nodes until v returns FALSE, then returns pointer to that node
@@ -299,6 +299,8 @@ void bloop(char *starturl)
 	tag *root=newchild(NULL);
 	rtag(root,t,"!",3);
 	char *text=tops(root);
+	puts("end tops");
+	puts(text);
 	//tdump();
 	free(t);
 	free(text);

@@ -11,7 +11,9 @@ typedef struct {
 	tagl child; //a list of these, it forms the tree
 	int childm;
 	void *parent;
+	//internal attributes 
 	char *freetext;
+	int lnum;
 } tag;
 //trade space for time
 #define PRLC 100
@@ -25,8 +27,9 @@ char *rtag(tag *t, char *s, char *supername,int state);
 //It's first argument will be the current tag, the last two arguments are used by the consumer to configure your search function
 //The first of the user configurable arguments is just a string.
 //The secondone as an accumulator like pointer that can be updated by modifying it or returning a new pointer, the
-//Your function can terminate the search by (TODO: figure out what terminates the search)
-tag *sdom(tag *, int(*)(tag *,char *,int *),char *,int *);
+//Your function can terminate the search by returning a zero at which point the current tag is returned from sdom (if the dom ends NULL is returned.)
+//The n argument is intened to be used to indicate "nth matching" or as a memory counter.
+tag *sdom(tag *, int(*)(tag *,char **,int *),char **,int *);
 int bytype(tag *,char *, int);
 char **getprop(tag *,char *);
 //TODO: taglist insert, delete
@@ -34,7 +37,7 @@ char **getprop(tag *,char *);
 //TODO: property dictionary delete
 
 char *scrubquotes(char *);
-char *as(char *,char *,int *);
+char *as(char **,char *,int *);
 char *asn(char *,int n, char *,int *);
 char *tomarkdown(tag *);
 char *getref(int);
