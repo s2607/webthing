@@ -1,4 +1,6 @@
-#Webthing
+
+Webthing
+====
 
 A very basic unix web toolkit. 
 
@@ -12,3 +14,5 @@ Future feature ideas (in no order):
   5) support converting to from markdown for simple pages and editing from $EDITOR and PUTing the page back to the server would be neat if for nothing more than historical reasons
   6) redo interactive pager.
   7) Js (ducktape? it looks good but the scheduler cant handle thenables)
+  8) generate postscript with embedded images etc.
+  9) maybe a GUI with that atari game library.
