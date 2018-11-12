@@ -258,23 +258,6 @@ void dump(tag *root,int i)
 			dump(root->child[k],i+1);
 	
 }
-int linkmenu(char *c,int *p,char **u)
-{
-	if(*c=='?'){
-		printf("Type a refrence number to jump there.\n");
-		printf("Type a u followed by a url to go there\n");
-		printf("Type a h to view history\n");
-		return 1;
-	}
-	if(getref(atoi(c))!=NULL){
-		char *n=getref(atoi(c));
-		printf("selected %d, %s\n",atoi(c),n);
-		*u=calloc(strlen(n),1);
-		memcpy(*u,n,strlen(n));
-		return -1;
-	}
-	return 0;
-}
 /*char *viewpage(char *url, char *oldurl)
 {
 	char *t;

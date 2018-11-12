@@ -18,7 +18,6 @@ char *asn(char *source,int n,char *dest,int *m)
 {
 	if(!source)
 		return dest;
-	puts(source);
 	if(dest==NULL){//TODO:some kind of heap corruption is causing this to crash
 		//s=calloc(PRLC,1);
 		//*m=PRLC;
@@ -34,8 +33,6 @@ char *asn(char *source,int n,char *dest,int *m)
 	}
 	dest[strlen(dest)+n]=0;
 	memcpy(dest+strlen(dest),source,n);
-	usleep(1*1000*100);
-	puts("end asn");
 	return dest;
 }
 typedef struct {
@@ -77,7 +74,7 @@ int ntos(tag *t,char **a,int *n)
 	static int suppress=0;
 	static int em=0;
 	static int headding=0;
-	static int acount=0;
+	static int acount=1;
 	static int islist=0;
 	static int lcount=0;
 	char lnbuf[20];
@@ -86,11 +83,11 @@ int ntos(tag *t,char **a,int *n)
 		return 1;
 //TODO: replace all these with "emit" functions that take a rendering state structure and a tag
 	if(t->type){
-	puts(t->type);
 		if(!strcasecmp(t->type,"a")){
 			if(t->closing){
 				free(popt());
 				snprintf(lnbuf,10,"[%d]",acount);
+				acount=acount+1;
 				*a=as(a,lnbuf,n);
 
 			} else{
@@ -99,7 +96,6 @@ int ntos(tag *t,char **a,int *n)
 				pusht("a");
 				if(p!=NULL){
 					t->lnum=acount;
-					acount=acount+1;
 					//hrefs[acount]=scrubquotes(*p);
 				}
 			}
@@ -156,6 +152,8 @@ int ntos(tag *t,char **a,int *n)
 			m[2]=' ';*/
 		if(t->freetext){
 			char *s=scrubquotes(t->freetext);
+			if(strlen(s) <2)
+				return 1;
 			if(ispushed("a"))
 				as(a,s,n);
 			else
@@ -164,35 +162,47 @@ int ntos(tag *t,char **a,int *n)
 			
 		}
 	}
-	puts("end ntos");
 	return 1;
 }
-/*char *refs(char *d, int *m, char **refs)
+int snr(tag *t,char **a,int *n) {
+	if(t->lnum == *n)
+		return 0;
+	return 1;
+}
+
+char *nthref(tag *root, int n) {
+	tag *a = sdom(root,snr,NULL,&n);//don't need to free?
+	if(a == NULL)
+		return NULL;
+	char ** r=getprop(a,"href");
+	if(r == NULL || *r == NULL)
+		return NULL;
+	char * cr = calloc(strlen(*r),1);
+	memcpy(cr,*r, strlen(*r));
+	return cr;
+
+}
+
+char *refs(tag *root,char **d, int *m)
 {
 	int i;
 	char *t;
-	d=as(d,"======REFRENCES======\n",m);
-	for(i=0;refs[i]!=NULL;i++){
-		t=calloc(strlen(refs[i])+14,1);
-		sprintf(t,"[%d]:%s\n",i+1,refs[i]);
-		d=as(d,t,m);
+	char nbuf[20];
+	*d=as(d,"\n\n======REFRENCES======\n",m);
+	for(i=1;(t=nthref(root,i))&&t!=NULL;i++){
+		snprintf(nbuf,20,"\n[%d]",i);
+		*d=as(d,nbuf,m);
+		*d=as(d,t,m);
 		free(t);
 	}
-	return d;
-}*/
+	return *d;
+}
 char *tops(tag *root)
 {
 	char *r=NULL;
 	int rm=0;
 	r=as(&r,"\%hdoc\n",&rm);
-	puts("sdom");
 	sdom(root,ntos,&r,&rm);
-	puts("end sdom");
-	//r=refs(r,&rm,hrefs);
+	r=refs(root,&r,&rm);
 	return r;
-}
-
-char *getref(int n)
-{
-	return "";
 }
