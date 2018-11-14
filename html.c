@@ -4,7 +4,7 @@
 #include <string.h>
 #include <curl/curl.h>
 #include "html.h"
-#include "pager.h"
+#include "newpager.h"
 #include "net.h"
 #include "tdump.h"
 
@@ -279,22 +279,24 @@ void bloop(char *starturl)
 	char *t=NULL;
 	CURLU *oldurl=NULL;
 	gettexturl(&t,&oldurl,starturl);
-	tag *root=newchild(NULL);
-	rtag(root,t,"!",3);
-	char *text=tops(root);
-	puts("end tops");
-	puts(text);
-	//tdump();
+	if(t!=NULL){
+		tag *root=newchild(NULL);
+		rtag(root,t,"!",3);
+		char *text=tops(root);
+		pagers p={0};
+		initpage(&p,text);
+		while(page(&p));
+		free(text);
+	}
 	free(t);
-	free(text);
 }
 int main(int argc, char **argv)
 {
 	if(!initcurl()||argc!=2);
 		//return -1;
 	//viewpage(argv[1]);
-	bloop("http://swiley.net");
-//	bloop("http://192.30.252.153");
+	//bloop("http://swiley.net");
+	bloop("http://192.30.252.153");
 	endcurl();
 	return 0;
 }

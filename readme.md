@@ -16,3 +16,4 @@ Future feature ideas (in no order):
   7) Js (ducktape? it looks good but the scheduler cant handle thenables)
   8) generate postscript with embedded images etc.
   9) maybe a GUI with that atari game library.
+  10) history (I *really* like how Tom Duff's Mothra browser does this)
