@@ -31,15 +31,17 @@ int page(pagers *p) {
 		p->curline=p->curline+p->l;
 		if(p->curline>p->totallines)
 			p->curline=p->totallines;
-	}else if(strcmp(l,"top") ){
-		p->curline=0;
-	}else if(strcmp(l,"bottom") ){
-		p->curline=p->totallines-p->l;
-		if(p->curline<0)p->curline=0;
-	}else if(strcmp(l,"help") ){
-		puts("top,bottom, empty lines page down, numbers follow links, goto resets the origin url");
-	}else
-		puts("?");
+	}else {
+		pcmd **c=NULL;
+		for(c=(p->cmds);*c!=NULL;c++){
+			if(!strcmp(l,(*c)->n))
+				(*c)->a(l,p);
+		}
+		if(c==NULL)
+			puts("?");
+			
+	}
+	
 	free(l);
 	char *s=lfn(p->s,p->w,p->curline);
 	int b=lfn(p->s,p->w,p->curline+p->l)-lfn(p->s,p->w,p->curline);
@@ -48,6 +50,20 @@ int page(pagers *p) {
 	return 1;
 
 }
+void p_top(char *l, pagers *p){
+	p->curline=0;
+}
+pcmd p_top_s ={n:"top",a:p_top};
+void p_bottom(char *l, pagers *p){
+	p->curline=p->totallines-p->l;
+	if(p->curline<0)p->curline=0;
+}
+pcmd p_bottom_s={n:"bottom",a:p_bottom};
+void p_help(char *l, pagers *p){
+		puts("top\nbottom\n empty lines page down\n jump <num> follow links\n goto resets the origin url\n");
+}
+pcmd p_help_s={n:"help",a:p_help};
+
 void initpage(pagers *p,char *s) {
 	p->w=79;
 	p->l=20;
@@ -58,5 +74,7 @@ void initpage(pagers *p,char *s) {
 		p->totallines+=1;
 	p->newlink=0;
 	p->method=0;
-
+	p->cmds=clappend(p->cmds,&p->cmds_m,&p_top_s);
+	p->cmds=clappend(p->cmds,&p->cmds_m,&p_bottom_s);
+	p->cmds=clappend(p->cmds,&p->cmds_m,&p_help_s);
 }

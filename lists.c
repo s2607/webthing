@@ -17,7 +17,7 @@ void **append(void **l, int *lm, void *a)//put pointer at end of list, growing b
 	int len;
 	for(len=0;(l)[len]&&len<*lm;len++);
 	if(len==(*lm)-1){//the extra elment garuntees null terminator
-		l=realloc(l,*lm+PRLC);
+		l=realloc(l,*lm+PRLC+1);
 		*lm=*lm+PRLC;
 		int i;
 		for(i=0;i<PRLC;i++)
@@ -29,3 +29,4 @@ void **append(void **l, int *lm, void *a)//put pointer at end of list, growing b
 
 tagl tlappend(tagl l, int *lm, void *a){return (tagl)append((void **)l,lm,a);}//heh
 stringl slappend(stringl l, int *lm, void *a){return (stringl)append((void **)l,lm,a);}//heh
+cmdl clappend(cmdl l, int *lm, void *a){return (cmdl)append((void **)l,lm,a);}//heh
