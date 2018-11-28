@@ -17,3 +17,7 @@ Future feature ideas (in no order):
   8) generate postscript with embedded images etc.
   9) maybe a GUI with that atari game library.
   10) history (I *really* like how Tom Duff's Mothra browser does this)
+
+##Warning
+
+This is by no means complete. While I occasionally run valgrind's memcheck over it there are plenty of memory coruption bugs and loose ends. It's very much just an experament and shouldn't be seriously used.

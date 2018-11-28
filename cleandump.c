@@ -165,12 +165,24 @@ int ntos(tag *t,char **a,int *n)
 	return 1;
 }
 int snr(tag *t,char **a,int *n) {
-	if(t->lnum == *n)
+	printf("looking for %d.\n",*n);
+	if(t == NULL){
+		puts("NULL");
+		return 1;
+	}
+	if(t->lnum == *n){
+		puts("found.");
 		return 0;
+	}
 	return 1;
 }
 
 char *nthref(tag *root, int n) {
+	printf("searching in %x",root);
+	if(root == NULL) {
+		printf("No Document!\n");
+		return NULL;
+	}
 	tag *a = sdom(root,snr,NULL,&n);//don't need to free?
 	if(a == NULL)
 		return NULL;

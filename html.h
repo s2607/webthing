@@ -41,4 +41,9 @@ char *as(char **,char *,int *);
 char *asn(char *,int n, char *,int *);
 char *tomarkdown(tag *);
 
+//TODO: move to another header
+char *tops(tag *);
+
+char *nthref(tag *, int );
+
 #endif

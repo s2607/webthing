@@ -19,9 +19,11 @@ typedef struct {
 
 } pagers;
 int page(pagers *);
-void initpage(pagers *,char *);
+void initpage(pagers *,char *, tag *);
+void destroypage(pagers *);
 typedef struct {
 	char *n;
 	void (*a) (char *,pagers *);
 }pcmd;
+int epcmd(char *,pagers *);
 #endif

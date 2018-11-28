@@ -29,10 +29,10 @@ int initcurl(void)
 }
 int gettexturl(char **s, CURLU **oldurl, char *u)
 {
-	if(!u)
+	if(u == NULL)
 		return -1;
 	if(oldurl == NULL)
-		return -1;
+		return -2;
 	if(*oldurl == NULL) 
 		*oldurl = curl_url();
 	CURLUcode res = curl_url_set(*oldurl,CURLUPART_URL,u,CURLU_DEFAULT_SCHEME);

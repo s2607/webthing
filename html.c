@@ -6,7 +6,6 @@
 #include "html.h"
 #include "newpager.h"
 #include "net.h"
-#include "tdump.h"
 
 char *scrubquotes(char *s)
 {
@@ -258,22 +257,6 @@ void dump(tag *root,int i)
 			dump(root->child[k],i+1);
 	
 }
-/*char *viewpage(char *url, char *oldurl)
-{
-	char *t;
-	char *u=url;
-
-	gettexturl(&t,oldurl,u);
-	tag *root=newchild(NULL);
-	rtag(root,t,"!",3);
-	char *text=tomarkdown(root);
-	char *ut;
-	pagethrough(text,linkmenu,&ut);
-
-	free(t);
-	free(text);
-	return ut;
-}*/
 void bloop(char *starturl)
 {
 	char *t=NULL;
@@ -284,19 +267,36 @@ void bloop(char *starturl)
 		rtag(root,t,"!",3);
 		char *text=tops(root);
 		pagers p={0};
-		initpage(&p,text);
+		initpage(&p,text,root);
 		while(page(&p));
-		free(text);
+		destroypage(&p);//right?
 	}
 	free(t);
 }
+#define IMESG "Welcome to the World Wide Web!\n\nType \"help\" for help.\n"
 int main(int argc, char **argv)
 {
-	if(!initcurl()||argc!=2);
+	//if(!initcurl()||argc!=2);
+	if(!initcurl()){
+		puts("Yeet!");
+		return -1;
+	}
 		//return -1;
 	//viewpage(argv[1]);
-	//bloop("http://swiley.net");
-	bloop("http://192.30.252.153");
+	pagers p={0};
+	char *imesg=calloc(strlen(IMESG),1);
+	memcpy(imesg,IMESG,strlen(IMESG));
+	initpage(&p,imesg,NULL);
+	int i;
+	for(i=1;i<=argc;i++) {
+		if(!epcmd(argv[i],&p))
+			printf("BAD COMMAND:%s\n",argv[i]);
+	}
+	while(page(&p));
+	destroypage(&p);
+	puts("Goodbye");
+//	bloop("http://swiley.net");
+//	bloop("http://192.30.252.153");
 	endcurl();
 	return 0;
 }
