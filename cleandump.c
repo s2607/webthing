@@ -165,7 +165,6 @@ int ntos(tag *t,char **a,int *n)
 	return 1;
 }
 int snr(tag *t,char **a,int *n) {
-	printf("looking for %d.\n",*n);
 	if(t == NULL){
 		puts("NULL");
 		return 1;
@@ -178,7 +177,6 @@ int snr(tag *t,char **a,int *n) {
 }
 
 char *nthref(tag *root, int n) {
-	printf("searching in %x",root);
 	if(root == NULL) {
 		printf("No Document!\n");
 		return NULL;
@@ -189,9 +187,7 @@ char *nthref(tag *root, int n) {
 	char ** r=getprop(a,"href");
 	if(r == NULL || *r == NULL)
 		return NULL;
-	char * cr = calloc(strlen(*r),1);
-	memcpy(cr,*r, strlen(*r));
-	return cr;
+	return scrubquotes(*r);
 
 }
 

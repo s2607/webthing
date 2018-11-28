@@ -9,16 +9,17 @@
 
 char *scrubquotes(char *s)
 {
-	char *a=s;
-	char *b=s+strlen(s)-1;
-	if(*a=='"')
-		a=a+1;
-	if(*b=='"')
-		b=b-1;
 	char *r;
-	r=calloc(b-a+1,1);
-	memcpy(r,a,b-a+1);
-	r[b-a+1]=0;
+	r=calloc(strlen(s),1);
+	int i=0;
+	int j=0;
+	for(i=j=0;i<strlen(s);i++,j++) {
+		if(s[i]!='"')
+			r[j]=s[i];
+		else
+			j=j-1;
+	}
+	r[j]=0;
 	return r;
 }
 
