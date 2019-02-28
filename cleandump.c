@@ -83,6 +83,18 @@ int ntos(tag *t,char **a,int *n)
 		return 1;
 //TODO: replace all these with "emit" functions that take a rendering state structure and a tag
 	if(t->type){
+		if(!strcasecmp(t->type,"form")){
+			if(t->closing){
+				*a=as(a,"\n+------------+\n",n);
+				free(popt());
+			} else {
+				pusht("form");
+				t->lnum=acount;
+				acount=acount+1;
+				snprintf(lnbuf,18,"\n+---form[%d]-+\n",acount);
+				*a=as(a,lnbuf,n);
+			}
+		}
 		if(!strcasecmp(t->type,"input")){
 			int submit=0;
 			char **pt=getprop(t,"type");
@@ -118,7 +130,7 @@ int ntos(tag *t,char **a,int *n)
 			} else{
 				char **p=getprop(t,"href");
 				islink=1;
-				pusht("a");
+				pusht("a");//TODO:free on initpage to prevent LEAK
 				if(p!=NULL){
 					t->lnum=acount;
 					//hrefs[acount]=scrubquotes(*p);
@@ -151,6 +163,12 @@ int ntos(tag *t,char **a,int *n)
 		}
 		if(!strcasecmp(t->type,"script")){//ehhhhhh
 				suppress=!suppress;//TODO: nested suppressed elements (ehh) (no, that wont work)
+		}
+		if(!strcasecmp(t->type,"style")){
+				suppress=!suppress;
+		}
+		if(!strcasecmp(t->type,"meta")){
+				suppress=!suppress;
 		}
 		if(!strcasecmp(t->type,"hr"))
 			*a=as(a,"     ----------------------------------\n",n);
@@ -191,11 +209,11 @@ int ntos(tag *t,char **a,int *n)
 }
 int snr(tag *t,char **a,int *n) {
 	if(t == NULL){
-		puts("NULL");
+	//	puts("NULL");
 		return 1;
 	}
 	if(t->lnum == *n){
-		puts("found.");
+	//	puts("found.");
 		return 0;
 	}
 	return 1;

@@ -11,7 +11,9 @@
 
 int llf(char *s, int w) {
 	int i=0;
-	for(i=0; s[i]!=0&&s[i]!='\n'&&i<w;i++);
+	for(i=0; s[i]!=0&&
+	s[i]!='\n'&&
+	i<w;i++);
 	if(s[i]=='\n'||i>=w)
 		i+=1;
 	return i;
@@ -21,7 +23,13 @@ char *lfn(char *s, int w, int n) {
 	int i=0;
 	int l=0;
 
-	for(i=l=0;s[i]!=0&&l<n;i+=llf(s+i,w),l+=1);
+	for(
+	i=l=0;
+	s[i]!=0&&
+	l<n;
+	i+=llf(s+i,w),
+	l+=1
+	);
 	return s+i;
 }
 void showpage(pagers *p) {

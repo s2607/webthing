@@ -10,7 +10,7 @@
 char *scrubquotes(char *s)
 {
 	char *r;
-	r=calloc(strlen(s),1);
+	r=calloc(strlen(s)+1,1);
 	int i=0;
 	int j=0;
 	for(i=j=0;i<strlen(s);i++,j++) {
@@ -285,7 +285,7 @@ int main(int argc, char **argv)
 		//return -1;
 	//viewpage(argv[1]);
 	pagers p={0};
-	char *imesg=calloc(strlen(IMESG),1);
+	char *imesg=calloc(strlen(IMESG)+1,1);
 	memcpy(imesg,IMESG,strlen(IMESG));
 	initpage(&p,imesg,NULL);
 	int i;
