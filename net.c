@@ -50,6 +50,8 @@ int gettexturl(char **s, CURLU **oldurl, char *u)
 	/* example.com is redirected, so we tell libcurl to follow redirection */
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, netfunc);
+	printf("TODO: verfy remote cert. THIS CONNECTION IS UNAUTHENTICATED!!!\n");
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 	//curl_easy_setopt(curl, CURLOPT_WRITEDATA,&n);//?
 	curnetdata=&n;
 

@@ -83,6 +83,31 @@ int ntos(tag *t,char **a,int *n)
 		return 1;
 //TODO: replace all these with "emit" functions that take a rendering state structure and a tag
 	if(t->type){
+		if(!strcasecmp(t->type,"input")){
+			int submit=0;
+			char **pt=getprop(t,"type");
+			if(pt!=NULL &&!strcasecmp(*pt,"submit"))
+				submit=1;
+			if(t->closing){
+				free(popt());
+				snprintf(lnbuf,10,"[%d]",acount);
+				acount=acount+1;
+				*a=as(a,lnbuf,n);
+				char **p=getprop(t,"type");
+				if(p!=NULL){
+					char *v=scrubquotes(*p);
+					*a=as(a,"-",n);
+					*a=as(a,v,n);
+					*a=as(a,"-",n);
+					free(v);
+				}else if(submit){
+					*a=as(a,"-submit-",n);
+				}
+			} else {
+				pusht("input");
+				t->lnum=acount;
+			}
+		}
 		if(!strcasecmp(t->type,"a")){
 			if(t->closing){
 				free(popt());

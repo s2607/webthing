@@ -289,7 +289,7 @@ int main(int argc, char **argv)
 	memcpy(imesg,IMESG,strlen(IMESG));
 	initpage(&p,imesg,NULL);
 	int i;
-	for(i=1;i<=argc;i++) {
+	for(i=1;i<argc;i++) {
 		if(!epcmd(argv[i],&p))
 			printf("BAD COMMAND:%s\n",argv[i]);
 	}

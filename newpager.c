@@ -126,7 +126,9 @@ void initpage(pagers *p,char *s, tag *root) {//NOTE: init and destroy leave the 
 	p->curline=0;
 	int i=0;
 	p->s=s;
-	for(i=p->totallines=0;i<strlen(p->s);i+=llf(p->s+i,p->w))
+	for(i=p->totallines=0;
+	i<strlen(p->s);
+	i+=llf(p->s+i,p->w))
 		p->totallines+=1;
 	p->newlink=0;
 	p->method=0;
