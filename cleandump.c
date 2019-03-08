@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "html.h"
 #include <unistd.h>
+#include "form.h"
 
 #define MARG 6
 //type,descriptor
@@ -65,9 +66,17 @@ int ispushed(char *t) {
 	}
 	return count;
 }
-int ntos(tag *t,char **a,int *n)
+void initrenderstate(renderstate *r,char **s, int *m) {
+	r->islink=0;
+	r->acount=0;
+	r->islist=0;
+	r->suppress=0;
+	r->a=s;
+	r->n=m;
+}
+int ntos(tag *t,char **rs, int *UNUSED)
 {//n must not be zero (it is the space argument to asn)
-	static int islink=0;//must do this
+	/*static int islink=0;//must do this
 	static int istitle=0;
 	static int inbody=0;
 	static int inhead=0;
@@ -76,8 +85,12 @@ int ntos(tag *t,char **a,int *n)
 	static int headding=0;
 	static int acount=1;
 	static int islist=0;
-	static int lcount=0;
+	static int lcount=0;*/
 	char lnbuf[20];
+	char *tbufm=alloca(1);
+	*tbufm=0;
+	int tbufn=1;
+	renderstate *r=(*(renderstate **)rs);
 	
 	if(!t)
 		return 1;
@@ -85,14 +98,15 @@ int ntos(tag *t,char **a,int *n)
 	if(t->type){
 		if(!strcasecmp(t->type,"form")){
 			if(t->closing){
-				*a=as(a,"\n+------------+\n",n);
+				*(r->a)=as(r->a,"\n+------------+\n",r->n);
 				free(popt());
 			} else {
 				pusht("form");
-				t->lnum=acount;
-				acount=acount+1;
-				snprintf(lnbuf,18,"\n+---form[%d]-+\n",acount);
-				*a=as(a,lnbuf,n);
+				t->lnum=r->acount;
+				r->acount=r->acount+1;
+				snprintf(lnbuf,18,"\n+---form[%d]-+\n",r->acount);
+				printf("link %d (form) \n",r->acount);
+				*(r->a)=as(r->a,lnbuf,r->n);
 			}
 		}
 		if(!strcasecmp(t->type,"input")){
@@ -102,37 +116,41 @@ int ntos(tag *t,char **a,int *n)
 				submit=1;
 			if(t->closing){
 				free(popt());
-				snprintf(lnbuf,10,"[%d]",acount);
-				acount=acount+1;
-				*a=as(a,lnbuf,n);
+				snprintf(lnbuf,10,"[%d]",r->acount);
+				printf("link %d (input) \n",r->acount);
+				r->acount=r->acount+1;
+				*(r->a)=as(r->a,lnbuf,r->n);
 				char **p=getprop(t,"type");
 				if(p!=NULL){
 					char *v=scrubquotes(*p);
-					*a=as(a,"-",n);
-					*a=as(a,v,n);
-					*a=as(a,"-",n);
+					*(r->a)=as(r->a,"-",r->n);
+					*(r->a)=as(r->a,v,r->n);
+					*(r->a)=as(r->a,"-",r->n);
 					free(v);
 				}else if(submit){
-					*a=as(a,"-submit-",n);
+					*(r->a)=as((r->a),"-submit-",r->n);
 				}
 			} else {
 				pusht("input");
-				t->lnum=acount;
+				t->lnum=r->acount;
+				printf("link %d (input) \n",r->acount);
 			}
 		}
 		if(!strcasecmp(t->type,"a")){
 			if(t->closing){
 				free(popt());
-				snprintf(lnbuf,10,"[%d]",acount);
-				acount=acount+1;
-				*a=as(a,lnbuf,n);
+				snprintf(lnbuf,10,"[%d]",r->acount);
+				printf("link %d (anchor) \n",r->acount);
+				r->acount=r->acount+1;
+				*(r->a)=as(r->a,lnbuf,r->n);
 
 			} else{
 				char **p=getprop(t,"href");
-				islink=1;
+				r->islink=1;
 				pusht("a");//TODO:free on initpage to prevent LEAK
 				if(p!=NULL){
-					t->lnum=acount;
+					t->lnum=r->acount;
+					printf("link %d (anchor) %s\n",r->acount,*p);
 					//hrefs[acount]=scrubquotes(*p);
 				}
 			}
@@ -141,18 +159,28 @@ int ntos(tag *t,char **a,int *n)
 		if(!strcasecmp(t->type,"img")){
 			char **p=getprop(t,"src");
 			if(p!=NULL){
-				t->lnum=acount;
-				snprintf(lnbuf,10,"[i%d]",acount);
-				*a=as(a,lnbuf,n);
-				acount=acount+1;
+				t->lnum=r->acount;
+				snprintf(lnbuf,10,"[i%d]",r->acount);
+				printf("link %d (image) %s\n",r->acount,*p);
+				*(r->a)=as(r->a,lnbuf,r->n);
+				r->acount=r->acount+1;
+			}
+			p=getprop(t,"alt");
+			if(p!=NULL){//OPT cachestrlen
+				if(tbufn<strlen(*p)){
+					alloca(strlen(*p)-tbufn);
+					tbufn+=strlen(*p);
+				}
+				snprintf(tbufm,tbufn-1,"%s",*p);
+				*(r->a)=as(r->a,tbufm,r->n);
 			}
 
 		}
 		if(!strcasecmp(t->type,"ul")){
-			islist=1;
+			r->islist=1;
 			//ptext(docm,&n,"","\n",MARG);
 			//emitstring("[list]","p");
-			*a=as(a,"\n",n);
+			*(r->a)=as(r->a,"\n",r->n);
 		
 		}
 		if(!strcasecmp(t->type,"li")){
@@ -162,45 +190,33 @@ int ntos(tag *t,char **a,int *n)
 				pusht("li");
 		}
 		if(!strcasecmp(t->type,"script")){//ehhhhhh
-				suppress=!suppress;//TODO: nested suppressed elements (ehh) (no, that wont work)
+				r->suppress=!r->suppress;//TODO: nested suppressed elements (ehh) (no, that wont work)
 		}
 		if(!strcasecmp(t->type,"style")){
-				suppress=!suppress;
+				r->suppress=!r->suppress;
 		}
-		if(!strcasecmp(t->type,"meta")){
+		/*if(!strcasecmp(t->type,"meta")){
 				suppress=!suppress;
+		}*/
+		if(!strcasecmp(t->type,"link")){
+				r->suppress=!r->suppress;//eehhhh
 		}
 		if(!strcasecmp(t->type,"hr"))
-			*a=as(a,"     ----------------------------------\n",n);
+			*(r->a)=as(r->a,"     ----------------------------------\n",r->n);
 		
 		if(!strcasecmp(t->type,"br"))
-			*a=as(a,"\n",n);
+			*(r->a)=as(r->a,"\n",r->n);
 	}
 	//actuall text content rendering goes here
-	if(!suppress){
-		int j;
-		/*for(j=0;j<7;j++)
-			m[j]=0;
-		if(inhead)	
-			m[0]='=';
-		else
-			m[0]=' ';
-		if(islink)
-			m[1]='0'+acount;//TODO:insanely crappy
-		else
-			m[1]=' ';
-		if(islist>2)
-			m[2]='*';
-		else
-			m[2]=' ';*/
+	if(!r->suppress){
 		if(t->freetext){
 			char *s=scrubquotes(t->freetext);
 			if(strlen(s) <2)
 				return 1;
 			if(ispushed("a"))
-				as(a,s,n);
+				as(r->a,s,r->n);
 			else
-				as(a,s,n);
+				as(r->a,s,r->n);
 			free(s);
 			
 		}
@@ -218,8 +234,8 @@ int snr(tag *t,char **a,int *n) {
 	}
 	return 1;
 }
-
-char *nthref(tag *root, int n) {
+char *nthref(tag *root, int n) {//THE DOM MUST HAVE SOMETHING TO RETURN OR THIS WILL CAUSE 
+//A NULL POINTER TO BE FREED (or searches for links to prematurely terminate)
 	if(root == NULL) {
 		printf("No Document!\n");
 		return NULL;
@@ -228,6 +244,14 @@ char *nthref(tag *root, int n) {
 	if(a == NULL)
 		return NULL;
 	char ** r=getprop(a,"href");
+	if(r == NULL || *r == NULL)
+		r=getprop(a,"src");
+	if(r == NULL || *r == NULL)
+		r=getprop(a,"action");
+	if(r == NULL || *r == NULL)
+		r=getprop(a,"id");
+	if(r == NULL || *r == NULL)
+		r=getprop(a,"value");
 	if(r == NULL || *r == NULL)
 		return NULL;
 	return scrubquotes(*r);
@@ -240,7 +264,9 @@ char *refs(tag *root,char **d, int *m)
 	char *t;
 	char nbuf[20];
 	*d=as(d,"\n\n======REFRENCES======\n",m);
-	for(i=1;(t=nthref(root,i))&&t!=NULL;i++){
+	for(i=1;
+	(t=nthref(root,i))!=NULL
+	;i++){
 		snprintf(nbuf,20,"\n[%d]",i);
 		*d=as(d,nbuf,m);
 		*d=as(d,t,m);
@@ -252,8 +278,11 @@ char *tops(tag *root)
 {
 	char *r=NULL;
 	int rm=0;
+	renderstate *rs=calloc(1,sizeof(renderstate));//heh
+	initrenderstate(rs,&r,&rm);
 	r=as(&r,"\%hdoc\n",&rm);
-	sdom(root,ntos,&r,&rm);
+	sdom(root,ntos,(char **)&rs,&rm);
 	r=refs(root,&r,&rm);
+	free(rs);
 	return r;
 }

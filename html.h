@@ -36,6 +36,17 @@ char **getprop(tag *,char *);
 //TODO: get element by id
 //TODO: property dictionary delete
 
+typedef struct {
+	int islink;
+	int acount;
+	int islist;
+	int suppress;
+	char **a;
+	int *n;
+} renderstate;
+
+void initrenderer(renderstate *);
+
 char *scrubquotes(char *);
 char *as(char **,char *,int *);
 char *asn(char *,int n, char *,int *);
@@ -45,5 +56,7 @@ char *tomarkdown(tag *);
 char *tops(tag *);
 
 char *nthref(tag *, int );
+int lcount(tag *);//potentially super slow!
+//TODO:in the future: maybe have the dom be a tuple of the root tag and a structure containing locks and caches.
 
 #endif

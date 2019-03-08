@@ -136,10 +136,31 @@ int isbaren(char *type)
 	char *inlines[] = {"a","em","strong","code","kbd","samp","var","b","b","i","u","small","s","strike","*/
 }
 
+int stspace(int *state, tag *t, stringl *curs, char ***cursn, int *tm){
+	if(*state==2||*state==5||*state==6||*state==0){
+		*state=1;
+		//new property, must also alloc name and value
+		t->pn=slappend(t->pn,&(t->pnm),calloc(sizeof(char),PRLC));
+		*tm=PRLC;
+		int tail;
+		for(tail=0;t->pn[tail];tail++);
+		*curs=&(t->pn[tail-1]);
+		//alloc value
+		
+		t->pv=slappend(t->pv,&(t->pvm),calloc(sizeof(char),PRLC));
+		//NOTE: on state 2 we must remember we calloced PRLC elemnts
+		for(tail=0;t->pn[tail];tail++);
+		*cursn=&(t->pv[tail-1]);
+		return 1;
+		
+	} if(*state==1) return 1; //dont put space in property name
+	return 0;
+}
+
 char *rtag(tag *t, char *s, char *supername,int state)
 {
-//TODO: non html inner text (script, comment, pre): replace mode 3 with mode 4 that just fills inner text
-	//0 tagname 1 propname  2 propval 3 freetext 
+//TODO: non html inner text (script, comment, pre): replace mode 3 with mode 6 that just fills inner text
+	//0 tagname 1 propname  2 propval 3 freetext of normal tag 4 freetext of raw tag 5 single quoted propval 6 double quoted propval
 	char *freetext=NULL;
 	int freetextm=0;
 	int typem=0;
@@ -182,7 +203,7 @@ char *rtag(tag *t, char *s, char *supername,int state)
 				break;
 			case '/': if(state==0){t->closing=1;continue;}break; 
 			case '>': 
-				if(state<3){
+				if(state<3){//why?
 					int b=isbaren(t->type);
 					if(b<0)
 						return s;//void tag like br
@@ -196,25 +217,14 @@ char *rtag(tag *t, char *s, char *supername,int state)
 						return s; 
 					//printf("state:%d b:%d ",state,b);
 					continue;
-				} 
+				}
 			case '=': if(state==1){state=2; tm=PRLC; curm=&tm; curs=cursn; continue;}
-			case ' ': if(state==2||state==0){
-				state=1;
-				//new property, must also alloc name and value
-				t->pn=slappend(t->pn,&(t->pnm),calloc(sizeof(char),PRLC));
-				tm=PRLC;
-				int tail;
-				for(tail=0;t->pn[tail];tail++);
-				curs=&(t->pn[tail-1]);
-				//alloc value
-				
-				t->pv=slappend(t->pv,&(t->pvm),calloc(sizeof(char),PRLC));
-				//NOTE: on state 2 we must remember we calloced PRLC elemnts
-				for(tail=0;t->pn[tail];tail++);
-				cursn=&(t->pv[tail-1]);
-				continue;
-				
-				} if(state==1) continue; //dont put space in property name
+			case '\'': if(state==2){state=5;continue;} else if(state==5){stspace(&state,t,&curs,&cursn,&tm);continue;}
+			case '"': if(state==2){state=6;continue;} else if(state==6){stspace(&state,t,&curs,&cursn,&tm);continue;}
+			case '\\': if(state==5||state==6) if(*(s+1)=='\''||(*(s+1))=='"')s+=1; continue;
+			//TODO:XXX:BROKEN factor out char append so we can correctly add escaped character
+			//TODO:only skip escapes for correct state
+			case ' ': if(stspace(&state,t,&curs,&cursn,&tm))continue;
 			}//switch
 			//some text or name or attribute
 
@@ -258,7 +268,7 @@ void dump(tag *root,int i)
 			dump(root->child[k],i+1);
 	
 }
-void bloop(char *starturl)
+/*void bloop(char *starturl)
 {
 	char *t=NULL;
 	CURLU *oldurl=NULL;
@@ -273,7 +283,7 @@ void bloop(char *starturl)
 		destroypage(&p);//right?
 	}
 	free(t);
-}
+}*/
 #define IMESG "Welcome to the World Wide Web!\n\nType \"help\" for help.\n"
 int main(int argc, char **argv)
 {

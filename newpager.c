@@ -76,8 +76,8 @@ void opage(char *url, pagers *p) {
 	int res= gettexturl(&t,&p->origin,url);
 	if(t!=NULL){
 		tag *root=NULL;
-		if(p->root==NULL)
-			initpage(p,"",NULL);
+	//	if(p->root==NULL)
+		initpage(p,"",NULL);
 		root=p->root;
 		rtag(root,t,"!",3);//man I wish I remembed how this worked.
 		char *text=tops(root);
@@ -100,9 +100,10 @@ void p_bottom(char *l, pagers *p){
 }
 pcmd p_bottom_s={n:"bottom",a:p_bottom};
 void p_help(char *l, pagers *p){
-		puts(" top\n bottom\n empty lines page down.\n jump <num> follow links.\n goto resets the origin url.\n EOF:Yeet.\n");
+		puts(" top\n bottom\n empty lines page down.\n jump <num> follow links.\n goto resets the origin url.\n EOF or q:Yeet.\n");
 }
 pcmd p_help_s={n:"help",a:p_help};
+pcmd p_helps_s={n:"?",a:p_help};
 void p_goto(char *l, pagers *p){
 	char *ns=l+strlen("goto ");//TODO: trim whitespace
 	opage(ns,p);
@@ -127,6 +128,11 @@ void p_dump(char *l, pagers *p) {
 	p->curline=p->totallines;
 }
 pcmd p_dump_s ={n:"dump",a:p_dump};
+void p_quit(char *l, pagers *p) {
+	printf("Goodbye!\n");
+	exit(0);
+}
+pcmd p_quit_s={n:"q",a:p_quit};
 
 void initpage(pagers *p,char *s, tag *root) {//NOTE: init and destroy leave the URL untouched.
 	p->w=79;
@@ -143,9 +149,11 @@ void initpage(pagers *p,char *s, tag *root) {//NOTE: init and destroy leave the 
 	p->cmds=clappend(p->cmds,&p->cmds_m,&p_top_s);
 	p->cmds=clappend(p->cmds,&p->cmds_m,&p_bottom_s);
 	p->cmds=clappend(p->cmds,&p->cmds_m,&p_help_s);
+	p->cmds=clappend(p->cmds,&p->cmds_m,&p_helps_s);
 	p->cmds=clappend(p->cmds,&p->cmds_m,&p_goto_s);
 	p->cmds=clappend(p->cmds,&p->cmds_m,&p_jump_s);
 	p->cmds=clappend(p->cmds,&p->cmds_m,&p_dump_s);
+	p->cmds=clappend(p->cmds,&p->cmds_m,&p_quit_s);
 	if(root!=NULL)
 		p->root=root;
 	else
