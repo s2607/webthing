@@ -120,7 +120,7 @@ int ntos(tag *t,char **rs, int *UNUSED)
 				printf("link %d (input) \n",r->acount);
 				r->acount=r->acount+1;
 				*(r->a)=as(r->a,lnbuf,r->n);
-				char **p=getprop(t,"type");
+				char **p=getprop(t,"value");
 				if(p!=NULL){
 					char *v=scrubquotes(*p);
 					*(r->a)=as(r->a,"-",r->n);
@@ -234,13 +234,16 @@ int snr(tag *t,char **a,int *n) {
 	}
 	return 1;
 }
+tag *nthel(tag *root, int n) {
+	return sdom(root,snr,NULL,&n);
+}
 char *nthref(tag *root, int n) {//THE DOM MUST HAVE SOMETHING TO RETURN OR THIS WILL CAUSE 
 //A NULL POINTER TO BE FREED (or searches for links to prematurely terminate)
 	if(root == NULL) {
 		printf("No Document!\n");
 		return NULL;
 	}
-	tag *a = sdom(root,snr,NULL,&n);//don't need to free?
+	tag *a = nthel(root,n);
 	if(a == NULL)
 		return NULL;
 	char ** r=getprop(a,"href");

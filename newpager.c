@@ -32,6 +32,17 @@ char *lfn(char *s, int w, int n) {
 	);
 	return s+i;
 }
+char *garg(int l, char *s) {
+	//call it with the next l to get end of arg for strncpy.
+	if(s==NULL)
+		return NULL;
+	for(;*s==' ';s++);//trim leading whitespace
+	for(;*s!=0&&l>0;s++){
+		if(*s==' ')
+			l--;
+	}
+	return s;
+}
 void showpage(pagers *p) {
 	char *s=lfn(p->s,p->w,p->curline);
 	int b=lfn(p->s,p->w,p->curline+p->l)-lfn(p->s,p->w,p->curline);
@@ -67,6 +78,12 @@ int page(pagers *p) {
 	return 1;
 
 }
+void redraw(pagers *p) {
+		tag *root=p->root;
+		char *text=tops(root);
+		destroypage(p);
+		initpage(p,text,root);
+}
 void opage(char *url, pagers *p) {
 	char *t=NULL;
 	if(url == NULL){
@@ -80,9 +97,7 @@ void opage(char *url, pagers *p) {
 		initpage(p,"",NULL);
 		root=p->root;
 		rtag(root,t,"!",3);//man I wish I remembed how this worked.
-		char *text=tops(root);
-		destroypage(p);
-		initpage(p,text,root);
+		redraw(p);
 	}else {
 		puts("bad cheese");
 		printf("Got %d From net.",res);
@@ -100,7 +115,7 @@ void p_bottom(char *l, pagers *p){
 }
 pcmd p_bottom_s={n:"bottom",a:p_bottom};
 void p_help(char *l, pagers *p){
-		puts(" top\n bottom\n empty lines page down.\n jump <num> follow links.\n goto resets the origin url.\n EOF or q:Yeet.\n");
+		puts(" top\n bottom\n empty lines page down.\n jump <num> follow links.\n goto resets the origin url.\n set n val: set ns value (or whatever) to val.\n EOF or q:Yeet.\n");
 }
 pcmd p_help_s={n:"help",a:p_help};
 pcmd p_helps_s={n:"?",a:p_help};
@@ -133,6 +148,30 @@ void p_quit(char *l, pagers *p) {
 	exit(0);
 }
 pcmd p_quit_s={n:"q",a:p_quit};
+void p_set(char *l, pagers *p){
+	int n=atoi(garg(1,l));	
+	char **vp=NULL;
+	if(n==0){
+		//TODO: set n using name instead
+	}
+	tag *t = nthel(p->root,n);
+	if(t!=NULL){
+		vp = getprop(t,"value");
+		if(vp !=NULL) {
+			if(*vp!=NULL)
+				free(*vp);
+		*vp=calloc(strlen(garg(2,l)),1);
+		strcpy(*vp,garg(2,l));
+		redraw(p);
+		}else{
+			puts("No Value property on that element.");
+		}
+
+	}else{
+		puts("No such element.");
+	}
+}
+pcmd p_set_s={n:"set",a:p_set};
 
 void initpage(pagers *p,char *s, tag *root) {//NOTE: init and destroy leave the URL untouched.
 	p->w=79;
@@ -154,6 +193,7 @@ void initpage(pagers *p,char *s, tag *root) {//NOTE: init and destroy leave the 
 	p->cmds=clappend(p->cmds,&p->cmds_m,&p_jump_s);
 	p->cmds=clappend(p->cmds,&p->cmds_m,&p_dump_s);
 	p->cmds=clappend(p->cmds,&p->cmds_m,&p_quit_s);
+	p->cmds=clappend(p->cmds,&p->cmds_m,&p_set_s);
 	if(root!=NULL)
 		p->root=root;
 	else

@@ -83,7 +83,7 @@ tag *sdom(tag *r, int(*v)(tag *,char **,int*), char **d, int *nr)
 	
 }
 char **getprop(tag *t,char *n)
-{
+{//when editing: copy the contents to a temp buffer, free the singly derefenced pointer, allocate a new buffer for the new contents, set the singly derefenced pointer to point to the new value.
 	if(!t)
 		return NULL;
 	if(!t->pn)

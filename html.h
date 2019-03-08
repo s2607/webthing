@@ -55,6 +55,7 @@ char *tomarkdown(tag *);
 //TODO: move to another header
 char *tops(tag *);
 
+tag *nthel(tag *, int);
 char *nthref(tag *, int );
 int lcount(tag *);//potentially super slow!
 //TODO:in the future: maybe have the dom be a tuple of the root tag and a structure containing locks and caches.
