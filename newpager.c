@@ -84,19 +84,20 @@ void redraw(pagers *p) {
 		destroypage(p);
 		initpage(p,text,root);
 }
-void opage(char *url, pagers *p) {
+void opage(char *url, pagers *p, int method, char *fields) {
 	char *t=NULL;
+	printf("fields:%s\n",fields!=NULL?fields:"NULL");
 	if(url == NULL){
 		printf("No url?\n");
 		return;
 	}
-	int res= gettexturl(&t,&p->origin,url);
+	int res= gettexturl(&t,&p->origin,url,method,fields);
 	if(t!=NULL){
 		tag *root=NULL;
 	//	if(p->root==NULL)
 		initpage(p,"",NULL);
 		root=p->root;
-		rtag(root,t,"!",3);//man I wish I remembed how this worked.
+		rtag(root,t,"!",3,t);
 		redraw(p);
 	}else {
 		puts("bad cheese");
@@ -115,13 +116,13 @@ void p_bottom(char *l, pagers *p){
 }
 pcmd p_bottom_s={n:"bottom",a:p_bottom};
 void p_help(char *l, pagers *p){
-		puts(" top\n bottom\n empty lines page down.\n jump <num> follow links.\n goto resets the origin url.\n set n val: set ns value (or whatever) to val.\n EOF or q:Yeet.\n");
+		puts(" top\n bottom\n empty lines page down.\n jump <num> follow links.\n goto resets the origin url.\n set n val: set ns value (or whatever) to val.\n activate <num> submit form.\n edit <lnum> Open linenum in editor.\n EOF or q:Yeet.\n");
 }
 pcmd p_help_s={n:"help",a:p_help};
 pcmd p_helps_s={n:"?",a:p_help};
 void p_goto(char *l, pagers *p){
 	char *ns=l+strlen("goto ");//TODO: trim whitespace
-	opage(ns,p);
+	opage(ns,p,METHOD_GET,NULL);
 }
 pcmd p_goto_s ={n:"goto",a:p_goto};
 void p_jump(char *l, pagers *p){
@@ -134,7 +135,7 @@ void p_jump(char *l, pagers *p){
 		free(url);
 		return;
 	}
-	opage(url,p);
+	opage(url,p,METHOD_GET,NULL);
 	free(url);
 }
 pcmd p_jump_s ={n:"jump",a:p_jump};
@@ -172,6 +173,35 @@ void p_set(char *l, pagers *p){
 	}
 }
 pcmd p_set_s={n:"set",a:p_set};
+void p_activate(char *l, pagers *p) {
+	int n = atoi(garg(1,l));
+	tag *t=NULL;
+	t=nthel(p->root,n);
+	if(t == NULL) {
+		printf("No link number %d.\n",n);
+		return;
+	}
+	char *url=nthref(p->root,n);
+	if(url==NULL){
+		printf("No URL %d.\n",n);
+		return;
+	}
+		
+	int m=1;
+	char*fields=calloc(1,1);
+	formfields(t,&fields,&m);
+	printf("Sending with:%s\n",fields);
+	opage(url,p,mnum(t),fields);
+	free(fields);
+	free(url);
+	free(t);//? no
+}
+pcmd p_activate_s={n:"activate",a:p_activate};
+void p_edit(char *l, pagers *p) {
+	puts(p->s);
+	p->curline=p->totallines;
+}
+pcmd p_edit_s={n:"edit",a:p_edit};
 
 void initpage(pagers *p,char *s, tag *root) {//NOTE: init and destroy leave the URL untouched.
 	p->w=79;
@@ -194,6 +224,8 @@ void initpage(pagers *p,char *s, tag *root) {//NOTE: init and destroy leave the 
 	p->cmds=clappend(p->cmds,&p->cmds_m,&p_dump_s);
 	p->cmds=clappend(p->cmds,&p->cmds_m,&p_quit_s);
 	p->cmds=clappend(p->cmds,&p->cmds_m,&p_set_s);
+	p->cmds=clappend(p->cmds,&p->cmds_m,&p_activate_s);
+	p->cmds=clappend(p->cmds,&p->cmds_m,&p_edit_s);
 	if(root!=NULL)
 		p->root=root;
 	else

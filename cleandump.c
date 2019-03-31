@@ -68,7 +68,7 @@ int ispushed(char *t) {
 }
 void initrenderstate(renderstate *r,char **s, int *m) {
 	r->islink=0;
-	r->acount=0;
+	r->acount=1;
 	r->islist=0;
 	r->suppress=0;
 	r->a=s;
@@ -105,7 +105,7 @@ int ntos(tag *t,char **rs, int *UNUSED)
 				t->lnum=r->acount;
 				r->acount=r->acount+1;
 				snprintf(lnbuf,18,"\n+---form[%d]-+\n",r->acount);
-				printf("link %d (form) \n",r->acount);
+				//printf("link %d (form) \n",r->acount);
 				*(r->a)=as(r->a,lnbuf,r->n);
 			}
 		}
@@ -117,7 +117,7 @@ int ntos(tag *t,char **rs, int *UNUSED)
 			if(t->closing){
 				free(popt());
 				snprintf(lnbuf,10,"[%d]",r->acount);
-				printf("link %d (input) \n",r->acount);
+				//printf("link %d (input) \n",r->acount);
 				r->acount=r->acount+1;
 				*(r->a)=as(r->a,lnbuf,r->n);
 				char **p=getprop(t,"value");
@@ -133,14 +133,14 @@ int ntos(tag *t,char **rs, int *UNUSED)
 			} else {
 				pusht("input");
 				t->lnum=r->acount;
-				printf("link %d (input) \n",r->acount);
+				//printf("link %d (input) \n",r->acount);
 			}
 		}
 		if(!strcasecmp(t->type,"a")){
 			if(t->closing){
 				free(popt());
 				snprintf(lnbuf,10,"[%d]",r->acount);
-				printf("link %d (anchor) \n",r->acount);
+				//printf("link %d (anchor) \n",r->acount);
 				r->acount=r->acount+1;
 				*(r->a)=as(r->a,lnbuf,r->n);
 
@@ -150,7 +150,7 @@ int ntos(tag *t,char **rs, int *UNUSED)
 				pusht("a");//TODO:free on initpage to prevent LEAK
 				if(p!=NULL){
 					t->lnum=r->acount;
-					printf("link %d (anchor) %s\n",r->acount,*p);
+					//printf("link %d (anchor) %s\n",r->acount,*p);
 					//hrefs[acount]=scrubquotes(*p);
 				}
 			}
@@ -161,7 +161,7 @@ int ntos(tag *t,char **rs, int *UNUSED)
 			if(p!=NULL){
 				t->lnum=r->acount;
 				snprintf(lnbuf,10,"[i%d]",r->acount);
-				printf("link %d (image) %s\n",r->acount,*p);
+				//printf("link %d (image) %s\n",r->acount,*p);
 				*(r->a)=as(r->a,lnbuf,r->n);
 				r->acount=r->acount+1;
 			}

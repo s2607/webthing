@@ -17,6 +17,7 @@ Future feature ideas (in no order):
   8) generate postscript with embedded images etc.
   9) maybe a GUI with that atari game library.
   10) history (I *really* like how Tom Duff's Mothra browser does this)
+  11) check mimetype and handle it accordingly (text/plain in particular, maybe use mailcap)
 
 ##Warning
 

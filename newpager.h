@@ -7,7 +7,8 @@
 typedef struct { 
 	int curline;
 	int totallines;
-	char *s;
+	char *s;//text
+	char *t;//source (lol that's pretty bad)
 	int newlink;
 	int method;
 	int w;

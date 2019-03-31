@@ -1,5 +1,5 @@
 #ifndef HTML_H
-#define HTML_H 
+#define HTML_H 1
 #include "lists.h"
 typedef struct {
 	int closing;
@@ -13,7 +13,10 @@ typedef struct {
 	void *parent;
 	//internal attributes 
 	char *freetext;
-	int lnum;
+	int lnum;//link num
+	int loc;//byte num
+	int lineloc;//line num in tty
+	int eloc;
 } tag;
 //trade space for time
 #define PRLC 100
@@ -22,7 +25,7 @@ typedef struct {
 tag *newchild(tag *t);
 //text fragment nodes (type "itf") are the only ones that use the freetext field of the tag type
 void newchildtext(tag *t,char *it);
-char *rtag(tag *t, char *s, char *supername,int state);
+char *rtag(tag *t, char *s, char *supername,int state, char *olds);
 //this does a (preorder?) dom traversal with the funcction you specify. 
 //It's first argument will be the current tag, the last two arguments are used by the consumer to configure your search function
 //The first of the user configurable arguments is just a string.
@@ -35,6 +38,8 @@ char **getprop(tag *,char *);
 //TODO: taglist insert, delete
 //TODO: get element by id
 //TODO: property dictionary delete
+char *formfields(tag *,char **, int *);
+int mnum(tag *);
 
 typedef struct {
 	int islink;

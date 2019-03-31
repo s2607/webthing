@@ -157,7 +157,7 @@ int stspace(int *state, tag *t, stringl *curs, char ***cursn, int *tm){
 	return 0;
 }
 
-char *rtag(tag *t, char *s, char *supername,int state)
+char *rtag(tag *t, char *s, char *supername,int state, char *olds)
 {
 //TODO: non html inner text (script, comment, pre): replace mode 3 with mode 6 that just fills inner text
 	//0 tagname 1 propname  2 propval 3 freetext of normal tag 4 freetext of raw tag 5 single quoted propval 6 double quoted propval
@@ -170,12 +170,13 @@ char *rtag(tag *t, char *s, char *supername,int state)
 
 	int tm;//used for reallocing property lists entrys
 //	for(state=0;*s&&!(t->closing&&state>=1);s=s+1){
+	t->loc=s-olds;
 	for(;*s;s=s+1){
 		switch(*s){
 			case '<': if(state==3){ 
 				newchildtext(t,freetext);
 				freetextm=0;
-				s=rtag(newchild(t),s+1,t->type,0); 
+				s=rtag(newchild(t),s+1,t->type,0,olds); 
 				if(closed(t)){return s;} 
 				freetext=NULL;
 				freetextm=0;
@@ -201,7 +202,7 @@ char *rtag(tag *t, char *s, char *supername,int state)
 					}
 				}else
 				break;
-			case '/': if(state==0){t->closing=1;continue;}break; 
+			case '/': if(state==0){t->closing=1; ((tag*)(t->parent))->eloc=t->loc;continue;}break; 
 			case '>': 
 				if(state<3){//why?
 					int b=isbaren(t->type);
@@ -267,6 +268,50 @@ void dump(tag *root,int i)
 		for(k=0;root->child[k];k++)
 			dump(root->child[k],i+1);
 	
+}
+
+char *formfields(tag *r,char **t, int *n) {
+	if(t==NULL)
+		return NULL;
+	if(!r->type)
+		return NULL;
+	if(!strcasecmp(r->type,"input")){
+		//basecase
+		char **name=getprop(r,"name");
+		if(name!=NULL&&*name!=NULL){
+			as(t,*name,n);
+			as(t,"=",n);
+			char **value=getprop(r,"value");
+			if(value!=NULL&&*value!=NULL){
+				as(t,*value,n);//TODO:URLENCODE
+				as(t,"&",n);
+			}
+		}
+	}else {
+		if((r->child)==NULL)
+			return NULL;
+		if(*(r->child)==NULL)
+			return NULL;
+		int i;
+		for(i=0;r->child[i];i++){
+			formfields(r->child[i],t,n);
+		}
+	}
+	if(strlen(*t)>1)
+		return *t-1;
+	else
+		return *t;
+
+}
+int mnum(tag *t) {
+	char **method=getprop(t,"method");
+	if(method!=NULL&&*method!=NULL){
+		if(!strcasecmp(*method,"GET"))
+			return METHOD_GET;
+		if(!strcasecmp(*method,"POST"))
+			return METHOD_POST;
+	}
+	return METHOD_GET;
 }
 /*void bloop(char *starturl)
 {
