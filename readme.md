@@ -6,18 +6,17 @@ A very basic unix web toolkit.
 
 In the end I would like to make something that lets you add the web to your workflow rather than a webbrowser where you do your work on the web. It should be oriented around open decentralized community pages rather than as a tool for coorperations to inject their software into your personal computer
 
+Form editing and submision works but searching duck duck go doesn't (because of a non standard redirect)
+
+you can use the ? command to see a list of commands. The browser can be used in scripts by passing commands as arguments.  (so anything you can do interactively can be done from a script)
+
 Future feature ideas (in no order):
-  1) form editing (including filling and submitting forms from command line arguments)
-  2) persistent session information in either sqlite3 db or flat files
-  3) some kind of built in search indexer would be amazing.
-  4) xpath from the CLI would be cool... for that you could just use xmlstarlet and htmltidy though.
-  5) support converting to from markdown for simple pages and editing from $EDITOR and PUTing the page back to the server would be neat if for nothing more than historical reasons
-  6) redo interactive pager.
-  7) Js (ducktape? it looks good but the scheduler cant handle thenables)
-  8) generate postscript with embedded images etc.
-  9) maybe a GUI with that atari game library.
-  10) history (I *really* like how Tom Duff's Mothra browser does this)
-  11) check mimetype and handle it accordingly (text/plain in particular, maybe use mailcap)
+
+  1) write a cgi proxy to handle caching, transformations, and javascrpt. This will let other tools interact with the session. (problems with this include: database syncronisation, and sharing the connection pool accross requests(processes) which we'll ignore for now.)
+  2) javascript would be cool.
+  3) fix non standard redirects.
+  4) css
+
 
 ##Warning
 
